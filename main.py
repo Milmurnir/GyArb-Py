@@ -1,3 +1,4 @@
+import time
 import pygame
 import random
 import keyboard
@@ -6,19 +7,19 @@ from win32api import *
 
 
 display = pygame.display.set_mode((1920,1080))
+player = Player([0,0],80,display,10)
 resolution = (GetSystemMetrics(0),GetSystemMetrics(1))
 playing = True
-tileSize = 120
+tileSize = 80
 tileList = []
 
 def makeTerrain():
-    for i in range(14):
-        yCord = i * tileSize
-        for o in range(8):
-            xCord = o * tileSize
-
-        tile = Tile((xCord,yCord),tileSize)
-        tileList.append(tile)
+    for i in range(11):
+        yCord = i * tileSize + 75
+        for o in range(17):
+            xCord = o * tileSize + 420
+            tile = Tile((xCord,yCord),tileSize,display)
+            tileList.append(tile)
 
 def start():
     pygame.init()
@@ -28,16 +29,28 @@ def update():
     for tile in tileList:
         tile.updateTile()
 
+    player.checkMovement()
+    player.drawPlayer()
+        
+
 start()
 
 while playing:
+    t = time.time()
+    
+    display.fill((0,0,0))
+    update()
+    pygame.display.update()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             playing = False
-
+            break 
         if keyboard.is_pressed("esc"):
             playing = False
-    
-    update()
-    pygame.display.update()
+
+
+    elapsed = time.time() - t 
+    if keyboard.is_pressed("f"):
+        print("Frames per second "+str(round(1/elapsed)))
