@@ -7,11 +7,13 @@ from win32api import *
 
 
 display = pygame.display.set_mode((1920,1080))
-player = Player([0,0],80,display,10)
+player = Player([0,0],120,display,5,0.5,7.5)
 resolution = (GetSystemMetrics(0),GetSystemMetrics(1))
 playing = True
 tileSize = 80
 tileList = []
+
+
 
 def makeTerrain():
     for i in range(11):
@@ -28,9 +30,15 @@ def start():
 def update():
     for tile in tileList:
         tile.updateTile()
+    
+    
+    
 
-    player.checkMovement()
+    player.checkKeyStrokes()
     player.drawPlayer()
+    for shot in player.shotList:
+        shot.drawShot()
+        shot.updateShot()
         
 
 start()
