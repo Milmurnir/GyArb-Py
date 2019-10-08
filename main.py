@@ -5,8 +5,10 @@ import keyboard
 from classes import *
 from win32api import * 
 
-
+display = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+"""
 display = pygame.display.set_mode((1920,1080))
+"""
 player = Player([0,0],120,display,5,0.5,7.5)
 resolution = (GetSystemMetrics(0),GetSystemMetrics(1))
 playing = True
@@ -31,15 +33,30 @@ def update():
     for tile in tileList:
         tile.updateTile()
     
-    
-    
-
     player.checkKeyStrokes()
+    if player.position[0] + player.size > resolution[0]:
+        player.position[0] = resolution[0] - player.size
+    elif player.position[0] < 0:
+        player.position[0] = 0
+    
+    if player.position[1] < 0:
+        player.position[1] = 0
+    elif player.position[1] + player.size > resolution[1]:
+        player.position[1] = resolution[1] - player.size
     player.drawPlayer()
+
     for shot in player.shotList:
         shot.drawShot()
         shot.updateShot()
+        if shot.X > resolution[0] + 500 or shot.X < 0 - 500:
+            player.shotList.remove(shot)
         
+        elif shot.Y > resolution[1] + 500 or shot.Y < 0 - 500:
+            player.shotList.remove(shot)
+        
+    
+    
+
 
 start()
 

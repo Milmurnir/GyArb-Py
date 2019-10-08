@@ -34,7 +34,7 @@ class Player:
         self.display = display
         self.sprite = LoadImage("enemy0.png",self.size,True)
         self.shootCooldown = shootCooldown
-        self.lastShoot = None
+        self.lastShoot = 0
         self.facingDirection = 1
         self.shotList = []
         self.shootingSpeed = shootingSpeed
@@ -42,7 +42,6 @@ class Player:
     def drawPlayer(self):
         self.display.blit(self.sprite,(self.position[0],self.position[1]))
         
-    
     def checkKeyStrokes(self):
         if keyboard.is_pressed("d"):
             self.DirectionX = 1
@@ -70,13 +69,11 @@ class Player:
         self.position[1] += self.DirectionY * self.movementSpeed
 
         if keyboard.is_pressed("space"):
-            if self.lastShoot == None:
-                self.lastShoot = time.time()
-            elif time.time() - self.lastShoot >= self.shootCooldown:
+            if time.time() - self.lastShoot >= self.shootCooldown:
                 self.lastShoot = time.time()
                 shot = Shot(self.facingDirection,self.shootingSpeed,self.position,self.display)
                 self.shotList.append(shot)
-                print(len(self.shotList))
+                
             
 
 class Shot:
@@ -106,3 +103,6 @@ class Shot:
             self.X -= self.speed
         
 
+class Chest:
+    def __init__(self):
+        pass
