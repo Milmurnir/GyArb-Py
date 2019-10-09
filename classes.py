@@ -18,17 +18,14 @@ class Tile:
     def __init__(self,position,size,display):
         self.position = position
         self.size = size
-        self.sprite = LoadImage("base.PNG",120,False)
+        self.sprite = LoadImage("uglywall.PNG",120,False)
         self.display = display
-    def updateTile(self):
-        self.display.blit(self.sprite,(self.position[0],self.position[1]))
-
 
 
 class Player:
-    def __init__(self,position,size,display,movementSpeed,shootCooldown,shootingSpeed):
+    def __init__(self,position,display,movementSpeed,shootCooldown,shootingSpeed):
         self.position = position
-        self.size = size
+        self.size = 120
         self.direction = 0
         self.movementSpeed = movementSpeed
         self.display = display
@@ -38,47 +35,64 @@ class Player:
         self.facingDirection = 1
         self.shotList = []
         self.shootingSpeed = shootingSpeed
+        self.directionX = 0
+        self.directionY = 0
+        self.aimingDirection = (0,1)
+
 
     def drawPlayer(self):
         self.display.blit(self.sprite,(self.position[0],self.position[1]))
         
     def checkKeyStrokes(self):
         if keyboard.is_pressed("d"):
-            self.DirectionX = 1
-            self.facingDirection = 2
-        
+            self.directionX = 1
+
+
         elif keyboard.is_pressed("a"):
-            self.DirectionX = -1
-            self.facingDirection = 4
-        
+            self.directionX = -1
+
         else:
-            self.DirectionX = 0
-        
+            self.directionX = 0
+            
+
         if keyboard.is_pressed("w"):
-            self.DirectionY = -1
-            self.facingDirection = 3
+            self.directionY = -1
+            
         
         elif keyboard.is_pressed("s"):
-            self.DirectionY = 1
-            self.facingDirection = 1
+            self.directionY = 1
         
         else:
-            self.DirectionY = 0
+            self.directionY = 0
+            
+
+        if self.directionX > 0:
+            self.aimingDirection = (1,0)
         
-        self.position[0] += self.DirectionX * self.movementSpeed
-        self.position[1] += self.DirectionY * self.movementSpeed
+        elif self.directionX < 0:
+            self.aimingDirection = (-1,0)
+
+        elif self.directionY > 0:
+            self.aimingDirection = (0,1)
+        
+        elif self.directionY < 0:
+            self.aimingDirection = (0,-1)
+
+
+        self.position[0] += self.directionX * self.movementSpeed
+        self.position[1] += self.directionY * self.movementSpeed
 
         if keyboard.is_pressed("space"):
             if time.time() - self.lastShoot >= self.shootCooldown:
                 self.lastShoot = time.time()
-                shot = Shot(self.facingDirection,self.shootingSpeed,self.position,self.display)
+                shot = Shot(self.aimingDirection,self.shootingSpeed,self.position,self.display)
                 self.shotList.append(shot)
                 
             
 
 class Shot:
-    def __init__(self,headingDirection,speed,playerPosition,display):
-        self.headingDirection = headingDirection
+    def __init__(self,aimingDirection,speed,playerPosition,display):
+        self.direction = aimingDirection
         self.speed = speed
         self.X = playerPosition[0]
         self.Y = playerPosition[1]
@@ -90,18 +104,20 @@ class Shot:
         self.display.blit(self.sprite,(self.X+32,self.Y+32))
 
     def updateShot(self):
-        if self.headingDirection == 1:
+        if self.direction[1] == 1:
             self.Y += self.speed
 
-        if self.headingDirection == 2:
-            self.X += self.speed
-        
-        if self.headingDirection == 3:
+        elif self.direction[1] == -1:
             self.Y -= self.speed
         
-        if self.headingDirection == 4:
+        elif self.direction[0] == 1:
+            self.X += self.speed
+
+        elif self.direction[0] == -1:
             self.X -= self.speed
-        
+
+
+
 
 class Chest:
     def __init__(self):
