@@ -18,9 +18,23 @@ class Tile:
     def __init__(self,position,size,display):
         self.position = position
         self.size = size
-        self.sprite = LoadImage("uglywall.PNG",120,False)
         self.display = display
 
+        if position[0] == 300:
+            self.sprite = LoadImage("wallright.PNG",self.size,False)
+        
+        elif position[0] == 1620:
+            self.sprite = LoadImage("wallleft.png",self.size,False)
+
+        elif position[1] == 75:
+            self.sprite = LoadImage("walldown.png",self.size,False)
+
+        elif position[1] == 795:
+            self.sprite = LoadImage("wallup.PNG",self.size,False)
+
+        else:
+            self.sprite = LoadImage("base.png",self.size,False)
+        
 
 class Player:
     def __init__(self,position,display,movementSpeed,shootCooldown,shootingSpeed):
