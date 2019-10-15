@@ -13,25 +13,27 @@ player = Player([0,0],display,5,0.5,7.5)
 resolution = (GetSystemMetrics(0),GetSystemMetrics(1))
 playing = True
 tileSize = 120
-background = pygame.Surface(resolution)
+roomList = []
 
 
-def makeTerrain():
-    for i in range(7):
-        yCord = i * tileSize + 75
-        for o in range(12):
-            xCord = o * tileSize + 300
-            
-            tile = Tile((xCord,yCord),tileSize,display)
-            background.blit(tile.sprite,tile.position)
+def makeNewRoom():
+    room = Room(resolution,tileSize)
+    room = room.makeRoom()
+    roomList.append(room)
+
 
 def start():
     pygame.init()
-    makeTerrain()
+    makeNewRoom()
+    
+
+    
+
+
 
 def update():
    
-    display.blit(background,(0,0))
+    display.blit(roomList[0],(0,0))
     player.checkKeyStrokes()
     if player.position[0] + player.size > resolution[0]:
         player.position[0] = resolution[0] - player.size
@@ -75,4 +77,4 @@ while playing:
     lt = t
      
     if keyboard.is_pressed("f"):
-        print("Frames per second "+str(elapsed))
+        print("Frames per second "+str(1/elapsed))

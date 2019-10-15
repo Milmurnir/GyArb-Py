@@ -15,10 +15,9 @@ def LoadImage(Name,Size,transparency):
 
 
 class Tile:
-    def __init__(self,position,size,display):
+    def __init__(self,position,size):
         self.position = position
         self.size = size
-        self.display = display
 
         if position[0] == 300:
             self.sprite = LoadImage("wallright.PNG",self.size,False)
@@ -136,3 +135,23 @@ class Shot:
 class Chest:
     def __init__(self):
         pass
+
+
+class Room:
+    def __init__(self,resolution,tileSize):
+        self.roomSize = (12,7)
+        self.resolution = resolution
+        self.background = pygame.Surface(self.resolution)
+        self.tileSize = tileSize
+        
+    
+    def makeRoom(self):
+        for i in range(self.roomSize[1]):
+            yCord = i * self.tileSize + 75
+            for o in range(self.roomSize[0]):
+                xCord = o * self.tileSize + 300
+                tile = Tile((xCord,yCord),self.tileSize)
+
+                self.background.blit(tile.sprite,tile.position)
+        
+        return self.background
