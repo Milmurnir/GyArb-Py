@@ -19,21 +19,34 @@ class Tile:
         self.position = position
         self.size = size
 
-        if position[0] == 300:
-            self.sprite = LoadImage("wallright.PNG",self.size,False)
+        if self.position[0] == 300:
+            self.sprite = LoadImage("wallleft.PNG",self.size,False)
         
-        elif position[0] == 1620:
-            self.sprite = LoadImage("wallleft.png",self.size,False)
+        elif self.position[0] == 1620:
+            self.sprite = LoadImage("wallright.png",self.size,False)
 
-        elif position[1] == 75:
-            self.sprite = LoadImage("walldown.png",self.size,False)
+        elif self.position[1] == 75:
+            self.sprite = LoadImage("wallup.png",self.size,False)
 
-        elif position[1] == 795:
-            self.sprite = LoadImage("wallup.PNG",self.size,False)
+        elif self.position[1] == 795:
+            self.sprite = LoadImage("walldown.PNG",self.size,False)
+
+        
 
         else:
             self.sprite = LoadImage("base.png",self.size,False)
         
+        if self.position[0] == 1620 and self.position[1] == 75:
+            self.sprite = LoadImage("wallCornerRightUp.png",self.size,False)
+        
+        elif self.position[0] == 1620 and self.position[1] == 795:
+            self.sprite = LoadImage("wallCornerRightdown.png",self.size,False)
+        
+        elif self.position[0] == 300 and self.position[1] == 75:
+            self.sprite = LoadImage("wallCornerLeftUp.png",self.size,False)
+        
+        elif self.position[0] == 300 and self.position[1] == 795:
+            self.sprite = LoadImage("wallcornerleftdown.png",self.size,False)
 
 class Player:
     def __init__(self,position,display,movementSpeed,shootCooldown,shootingSpeed):
