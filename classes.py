@@ -13,39 +13,46 @@ def LoadImage(Name,Size,transparency):
     Image = pygame.transform.scale(Image,(Size,Size))
     return Image
 
+def checkCollision(staticPosition,collidingPosition,staticSize,collidingSize,roomPosition):
+    if collidingPosition[0] + collidingSize >= staticPosition[0] + roomPosition[0] and collidingPosition[0] <= staticPosition[0] + staticSize + roomPosition[0]:
+        if collidingPosition[1] + collidingSize >= staticPosition[1] + roomPosition[1] and collidingPosition[1] <= staticPosition[1] + staticSize + roomPosition[1]:
+            print("collisin")
+            return True
 
 class Tile:
-    def __init__(self,position,size):
+    def __init__(self,position,size,roomSize):
         self.position = position
         self.size = size
+        self.sprite = None
+        self.spawnObject = None
 
-        if self.position[0] == 300:
+        if self.position[0] == roomSize[0] - roomSize[0]:
             self.sprite = LoadImage("wallleft.PNG",self.size,False)
         
-        elif self.position[0] == 1620:
+        elif self.position[0] == roomSize[0] - self.size:
             self.sprite = LoadImage("wallright.png",self.size,False)
 
-        elif self.position[1] == 75:
+        elif self.position[1] == roomSize[1] - roomSize[1] :
             self.sprite = LoadImage("wallup.png",self.size,False)
 
-        elif self.position[1] == 795:
+        elif self.position[1] == roomSize[1] - self.size :
             self.sprite = LoadImage("walldown.PNG",self.size,False)
-
-        
 
         else:
             self.sprite = LoadImage("base.png",self.size,False)
+            
         
-        if self.position[0] == 1620 and self.position[1] == 75:
+        if self.position[0] == roomSize[0] - self.size and self.position[1] == roomSize[1] - roomSize[1]:
             self.sprite = LoadImage("wallCornerRightUp.png",self.size,False)
         
-        elif self.position[0] == 1620 and self.position[1] == 795:
+        elif self.position[0] == roomSize[0] - self.size and self.position[1] == roomSize[1] - self.size:
             self.sprite = LoadImage("wallCornerRightdown.png",self.size,False)
+            
         
-        elif self.position[0] == 300 and self.position[1] == 75:
+        elif self.position[0] == roomSize[0] - roomSize[0] and self.position[1] == roomSize[1] - roomSize[1]:
             self.sprite = LoadImage("wallCornerLeftUp.png",self.size,False)
         
-        elif self.position[0] == 300 and self.position[1] == 795:
+        elif self.position[0] == roomSize[0] - roomSize[0] and self.position[1] == roomSize[1] - self.size:
             self.sprite = LoadImage("wallcornerleftdown.png",self.size,False)
 
 class Player:
@@ -65,11 +72,10 @@ class Player:
         self.directionY = 0
         self.aimingDirection = (0,1)
 
-
     def drawPlayer(self):
         self.display.blit(self.sprite,(self.position[0],self.position[1]))
         
-    def checkKeyStrokes(self):
+    def checkKeyStrokes(self,roomSize,roomPosition):
         if keyboard.is_pressed("d"):
             self.directionX = 1
 
@@ -108,6 +114,18 @@ class Player:
         self.position[0] += self.directionX * self.movementSpeed
         self.position[1] += self.directionY * self.movementSpeed
 
+        if self.position[0] + self.size > roomSize[0] + roomPosition[0] - self.size:
+            self.position[0] = roomSize[0] + roomPosition[0] - self.size - self.size
+
+        elif self.position[0] < roomPosition[0]  + self.size:
+            self.position[0] = roomPosition[0] + self.size
+
+        if self.position[1] + self.size > roomSize[1] + roomPosition[1] - self.size:
+            self.position[1] = roomSize[1] + roomPosition[1] - self.size - self.size
+
+        elif self.position[1] < roomPosition[1]  + self.size:
+            self.position[1] = roomPosition[1] + self.size
+
         if keyboard.is_pressed("space"):
             if time.time() - self.lastShoot >= self.shootCooldown:
                 self.lastShoot = time.time()
@@ -145,26 +163,48 @@ class Shot:
 
 
 
-class Chest:
-    def __init__(self):
-        pass
 
 
 class Room:
-    def __init__(self,resolution,tileSize):
-        self.roomSize = (12,7)
-        self.resolution = resolution
-        self.background = pygame.Surface(self.resolution)
+    def __init__(self,tileSize,position):
+        self.position = position
+        self.TileXY = (12,8)
+        self.roomSize = (1320 ,840)
+        self.background = pygame.Surface(self.roomSize)
         self.tileSize = tileSize
-        
+        self.tiles = []
     
     def makeRoom(self):
-        for i in range(self.roomSize[1]):
-            yCord = i * self.tileSize + 75
-            for o in range(self.roomSize[0]):
-                xCord = o * self.tileSize + 300
-                tile = Tile((xCord,yCord),self.tileSize)
-
+        for i in range(self.TileXY[1]):
+            yCord = i * self.tileSize
+            for o in range(self.TileXY[0]):
+                xCord = o * self.tileSize
+                tile = Tile([xCord,yCord],self.tileSize,self.roomSize)
+                self.tiles.append(tile)
                 self.background.blit(tile.sprite,tile.position)
+
+                if tile.position[0] == 600 and tile.position[1] == 360 and random.randrange(10) <= 5:
+                    
+                    tile.spawnObject = Chest(tile.position,tile.size,self.position)
+                    self.background.blit(tile.spawnObject.sprite,tile.position)
+
+
+                
         
-        return self.background
+        
+
+
+class Chest:
+    def __init__(self,position,tileSize,roomPosition):
+        self.item = None
+        self.position = position
+        self.tileSize = tileSize
+        self.sprite = LoadImage("chest.png",self.tileSize,True)
+        self.roomPosition = roomPosition
+        self.open = False
+
+    def checkOpen(self,playerPosition,playerSize):
+        if keyboard.is_pressed("e") and self.open == False:
+            self.open = checkCollision(self.position,playerPosition,playerSize,self.tileSize,self.roomPosition)
+
+        
