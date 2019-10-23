@@ -9,32 +9,27 @@ display = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 """
 display = pygame.display.set_mode((1920,1080))
 
-roomPosition = [520,195]
-player = Player([roomPosition[0]+100,roomPosition[1]+100],display,5,0.5,7.5)
+
+player = Player([0,0],display,5,0.5,7.5)
 resolution = (GetSystemMetrics(0),GetSystemMetrics(1))
 playing = True
 tileSize = 120
-roomList = []
+room = Room()
+specials = []
 
 
-def makeNewRoom():
-    room = Room(tileSize,roomPosition)
-    room.makeRoom()
-    roomList.append(room)
 
 
 def start():
     pygame.init()
-    makeNewRoom()
+
     
 def update():
 
-    display.blit(roomList[0].background,(roomPosition[0],roomPosition[1]))
-    for tile in (roomList[0].tiles):
-        if tile.spawnObject != None:
-            tile.spawnObject.checkOpen(player.position,player.size)
 
-    player.checkKeyStrokes(roomList[0].roomSize,roomPosition)
+    display.blit(room.background,(0,0))
+
+    player.checkKeyStrokes()
     
     player.drawPlayer()
 
@@ -46,6 +41,7 @@ def update():
         
         elif shot.Y > resolution[1] + 500 or shot.Y < 0 - 500:
             player.shotList.remove(shot)
+
 
 
 lt = 0
