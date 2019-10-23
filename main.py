@@ -10,15 +10,25 @@ display = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 display = pygame.display.set_mode((1920,1080))
 
 
+Map =[ 
+
+[1,10,10,10,10,10,10,10,10,10,10,10,10,10,10,2],
+[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
+[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
+[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
+[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
+[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
+[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
+[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
+[4,12,12,12,12,12,12,12,12,12,12,12,12,12,12,3]
+]
+
+
 player = Player([0,0],display,5,0.5,7.5)
 resolution = (GetSystemMetrics(0),GetSystemMetrics(1))
 playing = True
 tileSize = 120
-room = Room()
-specials = []
-
-
-
+room = Room(Map)
 
 def start():
     pygame.init()
@@ -43,7 +53,6 @@ def update():
             player.shotList.remove(shot)
 
 
-
 lt = 0
 start()
 while playing:
@@ -65,4 +74,4 @@ while playing:
     lt = t
      
     if keyboard.is_pressed("f"):
-        print("Frames per second "+str(1/elapsed))
+        print("Frames per second "+str(elapsed))

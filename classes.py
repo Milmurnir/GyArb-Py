@@ -25,6 +25,7 @@ class Tile:
         self.size = size
         self.sprite = LoadImage("base.png",self.size,False)
 
+"""
         if self.position[0] == 0:
             self.sprite = LoadImage("wallLeft.png",self.size,False)
         
@@ -48,7 +49,7 @@ class Tile:
         
         elif self.position[0] == 0 and self.position[1] == 1080 - self.size:
             self.sprite = LoadImage("wallCornerLeftDown.png",self.size,False)
-        
+        """
         
         
 
@@ -154,17 +155,46 @@ class Shot:
             self.X -= self.speed
 
 
-
-
 class Room:
-    def __init__(self):
+    def __init__(self,map):
         self.background = pygame.Surface((1920,1080))
         self.tileSize = 120
-        for i in range(round(1080/120)):
-            yCord = i * self.tileSize
-            for o in range(round(1920/120)):
-                xCord = o * self.tileSize
+    
+        for y in range(9):
+            yCord = y * self.tileSize
+            for x in range(16):
+                xCord = x * self.tileSize
+
                 tile = Tile([xCord,yCord],self.tileSize)
+                if map[y][x] == 0:
+                    tile.sprite = LoadImage("base.png",tile.size,False)
+                
+                elif map[y][x] == 1:
+                    tile.sprite = LoadImage("wallCornerLeftUp.png",tile.size,False)
+                
+                elif map[y][x] == 10:
+                    tile.sprite = LoadImage("wallUp.png",tile.size,False)
+                
+                elif map[y][x] == 2:
+                    tile.sprite = LoadImage("wallcornerrightup.png",tile.size,False)
+                
+                elif map[y][x] == 13:
+                    tile.sprite = LoadImage("wallright.png",tile.size,False)
+                
+                elif map[y][x] == 3:
+                    tile.sprite = LoadImage("wallcornerrightdown.png",tile.size,False)
+                
+                elif map[y][x] == 12:
+                    tile.sprite = LoadImage("walldown.png",tile.size,False)
+                
+                elif map[y][x] == 4:
+                    tile.sprite = LoadImage("wallcornerleftdown.png",tile.size,False)
+                
+                elif map[y][x] == 11:
+                    tile.sprite = LoadImage("wallleft.png",tile.size,False)
+                
+                
+                
                 self.background.blit(tile.sprite,tile.position)
     
 
