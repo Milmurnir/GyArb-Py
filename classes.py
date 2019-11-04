@@ -135,7 +135,7 @@ class Shot:
         self.X = playerPosition[0]
         self.Y = playerPosition[1]
         rnd = random.randrange(2)
-        self.sprite = LoadImage("shot"+str(rnd)+".png",32,True)
+        self.sprite = LoadImage("shot"+str(rnd)+".png",48,True)
         self.display = display
 
     def drawShot(self):
@@ -193,34 +193,43 @@ class Room:
                 elif map[y][x] == 13:
                     tile.sprite = LoadImage("wallleft.png",tile.size,False)
                 
+                elif map[y][x] == 30:
+                    self.background.blit(tile.sprite,tile.position)
+                    tile.sprite = LoadImage("stone.png",tile.size,True)
                 
+                elif map[y][x] == 32:
+                    self.background.blit(tile.sprite,tile.position)
+                    tile.sprite = LoadImage("stone.png",tile.size,True)
                 
+                elif map[y][x] == 34:
+                    self.background.blit(tile.sprite,tile.position)
+                    tile.sprite = LoadImage("stone.png",tile.size,True)
+                
+                elif map[y][x] == 42:
+                    self.background.blit(tile.sprite,tile.position)
+                    tile.sprite = LoadImage("chest.png",tile.size,True)
+                
+                elif map[y][x] == 34:
+                    self.background.blit(tile.sprite,tile.position)
+                    tile.sprite = LoadImage("stone.png",tile.size,True)
+                
+                elif map[y][x] == 36:
+                    self.background.blit(tile.sprite,tile.position)
+                    tile.sprite = LoadImage("stone.png",tile.size,True)
+
+                elif map[y][x] == 38:
+                    self.background.blit(tile.sprite,tile.position)
+                    tile.sprite = LoadImage("stone.png",tile.size,True)
+                
+                elif map[y][x] == 40:
+                    self.background.blit(tile.sprite,tile.position)
+                    tile.sprite = LoadImage("stone.png",tile.size,True)
+
+
                 self.background.blit(tile.sprite,tile.position)
     
 
 
-
-"""
-
-class Room:
-    def __init__(self,tileSize,roomOffset):
-        self.TileXY = (12,8)
-        self.roomSize = (1920,1080)
-        self.background = pygame.Surface(self.roomSize)
-        self.tileSize = tileSize
-        self.tiles = []
-        self.roomOffset = roomOffset
-    
-    def makeRoom(self,specials):
-        for i in range(self.TileXY[1]):
-            yCord = i * self.tileSize + self.roomOffset[1]
-            for o in range(self.TileXY[0]):
-                xCord = o * self.tileSize + self.roomOffset[0]
-                tile = Tile([xCord,yCord],self.tileSize,self.roomSize)
-                self.tiles.append(tile)
-                self.background.blit(tile.sprite,tile.position)
-"""
-                
 
 
                 
