@@ -178,7 +178,7 @@ class Room:
                 elif map[y][x] == 2:
                     tile.sprite = LoadImage("wallcornerrightup.png",tile.size,False)
                 
-                elif map[y][x] == 13:
+                elif map[y][x] == 11:
                     tile.sprite = LoadImage("wallright.png",tile.size,False)
                 
                 elif map[y][x] == 3:
@@ -190,7 +190,7 @@ class Room:
                 elif map[y][x] == 4:
                     tile.sprite = LoadImage("wallcornerleftdown.png",tile.size,False)
                 
-                elif map[y][x] == 11:
+                elif map[y][x] == 13:
                     tile.sprite = LoadImage("wallleft.png",tile.size,False)
                 
                 

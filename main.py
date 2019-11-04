@@ -3,39 +3,51 @@ import pygame
 import random
 import keyboard
 from classes import *
-from win32api import * 
+from win32api import *
+
+
+
 """
 display = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 """
 display = pygame.display.set_mode((1920,1080))
 
 
-Map =[ 
-
-[1,10,10,10,10,10,10,10,10,10,10,10,10,10,10,2],
-[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
-[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
-[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
-[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
-[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
-[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
-[11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13],
-[4,12,12,12,12,12,12,12,12,12,12,12,12,12,12,3]
-]
 
 
 player = Player([0,0],display,5,0.5,7.5)
 resolution = (GetSystemMetrics(0),GetSystemMetrics(1))
 playing = True
 tileSize = 120
-room = Room(Map)
+Map = []
+
 
 def start():
     pygame.init()
+    
+    
+
+
+def generateRoom():
+    n = random.randint(0,1)
+
+    baseMap = [
+
+        [1,10,10,10,10,10,10,10,10,10,10,10,10,10,10,2],
+        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
+        [13,0,n,0,0,0,0,0,0,0,0,0,0,n,0,11],
+        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
+        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
+        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
+        [13,0,n,0,0,0,0,0,0,0,0,0,0,n,0,11],
+        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
+        [4,12,12,12,12,12,12,12,12,12,12,12,12,12,12,3]
+    ]
+    return baseMap
+
 
     
 def update():
-
 
     display.blit(room.background,(0,0))
 
@@ -52,6 +64,11 @@ def update():
         elif shot.Y > resolution[1] + 500 or shot.Y < 0 - 500:
             player.shotList.remove(shot)
 
+
+
+
+Map = generateRoom()
+room = Room(Map)
 
 lt = 0
 start()
