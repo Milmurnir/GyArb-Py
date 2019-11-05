@@ -16,7 +16,7 @@ def LoadImage(Name,Size,transparency):
 def checkCollision(staticPosition,collidingPosition,staticSize,collidingSize):
     if collidingPosition[0] + collidingSize >= staticPosition[0] and collidingPosition[0] <= staticPosition[0] + staticSize:
         if collidingPosition[1] + collidingSize >= staticPosition[1] and collidingPosition[1] <= staticPosition[1] + staticSize:
-            print("collisin")
+            print("collision")
             return True
 
 class Tile:
@@ -24,32 +24,6 @@ class Tile:
         self.position = position
         self.size = size
         self.sprite = LoadImage("base.png",self.size,False)
-
-"""
-        if self.position[0] == 0:
-            self.sprite = LoadImage("wallLeft.png",self.size,False)
-        
-        if self.position[0] == 1920 - self.size:
-            self.sprite = LoadImage("wallRight.png",self.size,False)
-
-        if self.position[1] == 0:
-            self.sprite = LoadImage("wallUp.png",self.size,False)
-        
-        if self.position[1] == 1080 - self.size:
-            self.sprite = LoadImage("wallDown.png",self.size,False)
-        
-        if self.position[0] == 0 and self.position[1] == 0:
-            self.sprite = LoadImage("wallCornerLeftUp.png",self.size,False)
-        
-        elif self.position[0] == 1920 - self.size and self.position[1] == 0:
-            self.sprite = LoadImage("wallCornerRightUp.png",self.size,False)
-        
-        elif self.position[0] == 1920 - self.size and self.position[1] == 1080 - self.size:
-            self.sprite = LoadImage("wallCornerRightDown.png",self.size,False)
-        
-        elif self.position[0] == 0 and self.position[1] == 1080 - self.size:
-            self.sprite = LoadImage("wallCornerLeftDown.png",self.size,False)
-        """
         
         
 
@@ -156,9 +130,10 @@ class Shot:
 
 
 class Room:
-    def __init__(self,map):
+    def __init__(self,map,specialObjects):
         self.background = pygame.Surface((1920,1080))
         self.tileSize = 120
+        self.specialObjects = specialObjects
     
         for y in range(9):
             yCord = y * self.tileSize
@@ -193,37 +168,48 @@ class Room:
                 elif map[y][x] == 13:
                     tile.sprite = LoadImage("wallleft.png",tile.size,False)
                 
-                elif map[y][x] == 30:
-                    self.background.blit(tile.sprite,tile.position)
-                    tile.sprite = LoadImage("stone.png",tile.size,True)
-                
-                elif map[y][x] == 32:
-                    self.background.blit(tile.sprite,tile.position)
-                    tile.sprite = LoadImage("stone.png",tile.size,True)
-                
-                elif map[y][x] == 34:
-                    self.background.blit(tile.sprite,tile.position)
-                    tile.sprite = LoadImage("stone.png",tile.size,True)
-                
-                elif map[y][x] == 42:
-                    self.background.blit(tile.sprite,tile.position)
-                    tile.sprite = LoadImage("chest.png",tile.size,True)
-                
-                elif map[y][x] == 34:
-                    self.background.blit(tile.sprite,tile.position)
-                    tile.sprite = LoadImage("stone.png",tile.size,True)
-                
-                elif map[y][x] == 36:
-                    self.background.blit(tile.sprite,tile.position)
-                    tile.sprite = LoadImage("stone.png",tile.size,True)
+                else:
+                    if map[y][x] == 28:
+                        self.background.blit(tile.sprite,tile.position)
+                        tile.sprite = LoadImage("stone.png",tile.size,True)
+                        self.specialObjects.append(tile)
+                    
+                    elif map[y][x] == 30:
+                        self.background.blit(tile.sprite,tile.position)
+                        tile.sprite = LoadImage("stone.png",tile.size,True)
+                        self.specialObjects.append(tile)
+                    
+                    elif map[y][x] == 32:
+                        self.background.blit(tile.sprite,tile.position)
+                        tile.sprite = LoadImage("stone.png",tile.size,True)
+                        self.specialObjects.append(tile)
+                    
 
-                elif map[y][x] == 38:
-                    self.background.blit(tile.sprite,tile.position)
-                    tile.sprite = LoadImage("stone.png",tile.size,True)
-                
-                elif map[y][x] == 40:
-                    self.background.blit(tile.sprite,tile.position)
-                    tile.sprite = LoadImage("stone.png",tile.size,True)
+                    elif map[y][x] == 34:
+                        self.background.blit(tile.sprite,tile.position)
+                        tile.sprite = LoadImage("stone.png",tile.size,True)
+                        self.specialObjects.append(tile)
+                    
+                    elif map[y][x] == 36:
+                        self.background.blit(tile.sprite,tile.position)
+                        tile.sprite = LoadImage("stone.png",tile.size,True)
+                        self.specialObjects.append(tile)
+
+                    elif map[y][x] == 38:
+                        self.background.blit(tile.sprite,tile.position)
+                        tile.sprite = LoadImage("stone.png",tile.size,True)
+                        self.specialObjects.append(tile)
+                    
+                    elif map[y][x] == 40:
+                        self.background.blit(tile.sprite,tile.position)
+                        tile.sprite = LoadImage("stone.png",tile.size,True)
+                        self.specialObjects.append(tile)
+
+                    elif map[y][x] == 42:
+                        self.background.blit(tile.sprite,tile.position)
+                        tile.sprite = LoadImage("chest.png",tile.size,True)
+                        self.specialObjects.append(tile)
+                        
 
 
                 self.background.blit(tile.sprite,tile.position)

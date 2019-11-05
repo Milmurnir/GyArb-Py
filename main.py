@@ -14,18 +14,19 @@ display = pygame.display.set_mode((1920,1080))
 
 
 
-
+clock = pygame.time.Clock()
 player = Player([0,0],display,5,0.5,6)
 resolution = (GetSystemMetrics(0),GetSystemMetrics(1))
 playing = True
 tileSize = 120
 Map = []
+specialObjects = []
 
 
 def start():
     pygame.init()
     
-    
+
 
 
 def generateRoom():
@@ -75,14 +76,21 @@ def update():
 
 
 Map = generateRoom()
-room = Room(Map)
-
+room = Room(Map,specialObjects)
 lt = 0
 start()
+
+
+
+
 while playing:
     t = time.time()
-    
+    clock.tick(30)
+
     display.fill((0,0,0))
+    for tile in specialObjects:
+        checkCollision(tile.position,player.position,tile.size,player.size)
+
     update()
     pygame.display.update()
 
@@ -96,6 +104,7 @@ while playing:
 
     elapsed = t - lt
     lt = t
-     
+    
+    
     if keyboard.is_pressed("f"):
-        print("Frames per second "+str(elapsed))
+        print("Frames per second "+str(1/elapsed))
