@@ -34,7 +34,7 @@ class Player:
         self.direction = 0
         self.movementSpeed = movementSpeed
         self.display = display
-        self.sprite = LoadImage("enemy0.png",self.size,True)
+        self.sprite = LoadImage("player.png",self.size,True)
         self.shootCooldown = shootCooldown
         self.lastShoot = 0
         self.facingDirection = 1
