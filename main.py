@@ -20,7 +20,8 @@ resolution = (GetSystemMetrics(0),GetSystemMetrics(1))
 playing = True
 tileSize = 120
 Map = []
-specialObjects = []
+
+firstQuadrant = [0]
 
 
 def start():
@@ -57,8 +58,11 @@ def generateRoom():
     
 def update():
 
+# kan optimeras
     display.blit(room.background,(0,0))
 
+
+# kan optimeras
     player.checkKeyStrokes()
     
     player.drawPlayer()
@@ -71,12 +75,25 @@ def update():
         
         elif shot.Y > resolution[1] + 500 or shot.Y < 0 - 500:
             player.shotList.remove(shot)
+        
+    if player.quadrant == 1:
+        for tile in room.firstQuadrant:
+            checkCollision(tile.position,player.position,tile.size,player.size)
+    
+    elif player.quadrant == 2:
+        for tile in room.secondQuadrant:
+            checkCollision(tile.position,player.position,tile.size,player.size)
 
+    elif player.quadrant == 3:
+        for tile in room.thirdQuadrant:
+            checkCollision(tile.position,player.position,tile.size,player.size)
 
-
+    elif player.quadrant == 4:
+        for tile in room.fourthQuadrant:
+            checkCollision(tile.position,player.position,tile.size,player.size)
 
 Map = generateRoom()
-room = Room(Map,specialObjects)
+room = Room(Map,firstQuadrant)
 lt = 0
 start()
 
@@ -85,11 +102,11 @@ start()
 
 while playing:
     t = time.time()
-    clock.tick(30)
+    clock.tick(200)
 
     display.fill((0,0,0))
-    for tile in specialObjects:
-        checkCollision(tile.position,player.position,tile.size,player.size)
+#    for tile in specialObjects:
+#        checkCollision(tile.position,player.position,tile.size,player.size)
 
     update()
     pygame.display.update()

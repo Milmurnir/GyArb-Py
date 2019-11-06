@@ -24,6 +24,21 @@ class Tile:
         self.position = position
         self.size = size
         self.sprite = LoadImage("base.png",self.size,False)
+        self.quadrant = 0
+
+        if self.position[0] < 1920/2 and self.position[1] < 1080/2:
+            self.quadrant = 1
+        
+        elif self.position[0] > 1920/2 and self.position[1] < 1080/2:
+            self.quadrant = 2  
+        
+        elif self.position[0] < 1920/2 and self.position[1] > 1080/2:
+            self.quadrant = 3
+        
+        elif self.position[0] > 1920/2 and self.position[1] > 1080/2:
+            self.quadrant = 4        
+  
+
         
         
 
@@ -43,6 +58,7 @@ class Player:
         self.directionX = 0
         self.directionY = 0
         self.aimingDirection = (0,1)
+        self.quadrant = None
 
     def drawPlayer(self):
         self.display.blit(self.sprite,(self.position[0],self.position[1]))
@@ -85,14 +101,28 @@ class Player:
         if self.position[0] > 1920 - 2 *self.size:
             self.position[0] = 1920 - 2 * self.size
 
-        if self.position[0] < 0 + self.size:
+        elif self.position[0] < 0 + self.size:
             self.position[0] = 0 + self.size
 
         if self.position[1] < 0 + self.size:
             self.position[1] = 0 + self.size
         
-        if self.position[1] > 1080 - 2 * self.size:
+        elif self.position[1] > 1080 - 2 * self.size:
             self.position[1] = 1080 - 2 * self.size
+        
+
+        if self.position[0] < 1920/2 and self.position[1] < 1080/2:
+            self.quadrant = 1
+        
+        elif self.position[0] > 1920/2 and self.position[1] < 1080/2:
+            self.quadrant = 2  
+        
+        elif self.position[0] < 1920/2 and self.position[1] > 1080/2:
+            self.quadrant = 3
+        
+        elif self.position[0] > 1920/2 and self.position[1] > 1080/2:
+            self.quadrant = 4        
+
 
         if keyboard.is_pressed("space"):
             if time.time() - self.lastShoot >= self.shootCooldown:
@@ -130,10 +160,13 @@ class Shot:
 
 
 class Room:
-    def __init__(self,map,specialObjects):
+    def __init__(self,map,firstQuadrant):
         self.background = pygame.Surface((1920,1080))
         self.tileSize = 120
-        self.specialObjects = specialObjects
+        self.firstQuadrant = []
+        self.secondQuadrant = []
+        self.thirdQuadrant = []
+        self.fourthQuadrant = []
     
         for y in range(9):
             yCord = y * self.tileSize
@@ -169,48 +202,62 @@ class Room:
                     tile.sprite = LoadImage("wallleft.png",tile.size,False)
                 
                 else:
+                    if (map[y][x] % 2) == 0:
+                        if tile.quadrant == 1:
+                            self.firstQuadrant.append(tile)
+                        
+                        elif tile.quadrant == 2:
+                            self.secondQuadrant.append(tile)
+                        
+                        elif tile.quadrant == 3:
+                            self.thirdQuadrant.append(tile)
+                        
+                        elif tile.quadrant == 4:
+                            self.fourthQuadrant.append(tile)
+
                     if map[y][x] == 28:
                         self.background.blit(tile.sprite,tile.position)
                         tile.sprite = LoadImage("stone.png",tile.size,True)
-                        self.specialObjects.append(tile)
+                      
                     
                     elif map[y][x] == 30:
                         self.background.blit(tile.sprite,tile.position)
                         tile.sprite = LoadImage("stone.png",tile.size,True)
-                        self.specialObjects.append(tile)
+                       
                     
                     elif map[y][x] == 32:
                         self.background.blit(tile.sprite,tile.position)
                         tile.sprite = LoadImage("stone.png",tile.size,True)
-                        self.specialObjects.append(tile)
+                        
                     
-
                     elif map[y][x] == 34:
                         self.background.blit(tile.sprite,tile.position)
                         tile.sprite = LoadImage("stone.png",tile.size,True)
-                        self.specialObjects.append(tile)
+                        
                     
                     elif map[y][x] == 36:
                         self.background.blit(tile.sprite,tile.position)
                         tile.sprite = LoadImage("stone.png",tile.size,True)
-                        self.specialObjects.append(tile)
+                       
 
                     elif map[y][x] == 38:
                         self.background.blit(tile.sprite,tile.position)
                         tile.sprite = LoadImage("stone.png",tile.size,True)
-                        self.specialObjects.append(tile)
+                        
                     
                     elif map[y][x] == 40:
                         self.background.blit(tile.sprite,tile.position)
                         tile.sprite = LoadImage("stone.png",tile.size,True)
-                        self.specialObjects.append(tile)
+                        
 
                     elif map[y][x] == 42:
                         self.background.blit(tile.sprite,tile.position)
                         tile.sprite = LoadImage("chest.png",tile.size,True)
-                        self.specialObjects.append(tile)
+                    
+                    else:
+                        pass
                         
-
+                    
 
                 self.background.blit(tile.sprite,tile.position)
     
