@@ -5,18 +5,20 @@ import keyboard
 from win32api import * 
 
 def LoadImage(Name,Size,transparency):
-    Shortcut = "C:\Projects\GyArb-Py\Image"
+    Shortcut = "C:/Projects/GyArb-Py/Image"
     if transparency:
-        Image = pygame.image.load(Shortcut+"\\"+Name).convert_alpha()
+        Image = pygame.image.load(Shortcut+"/"+Name).convert_alpha()
     else:
         Image = pygame.image.load(Shortcut+"\\"+Name).convert()
     Image = pygame.transform.scale(Image,(Size,Size))
     return Image
 
+
+
 def checkCollision(staticPosition,collidingPosition,staticSize,collidingSize):
+    
     if collidingPosition[0] + collidingSize >= staticPosition[0] and collidingPosition[0] <= staticPosition[0] + staticSize:
         if collidingPosition[1] + collidingSize >= staticPosition[1] and collidingPosition[1] <= staticPosition[1] + staticSize:
-            print("collision")
             return True
 
 class Tile:
@@ -45,7 +47,7 @@ class Tile:
 class Player:
     def __init__(self,position,display,movementSpeed,shootCooldown,shootingSpeed):
         self.position = position
-        self.size = 120
+        self.size = 119
         self.direction = 0
         self.movementSpeed = movementSpeed
         self.display = display
@@ -59,6 +61,8 @@ class Player:
         self.directionY = 0
         self.aimingDirection = (0,1)
         self.quadrant = None
+        self.lastPosition = [0,0]
+        self.roomNumber = 0
 
     def drawPlayer(self):
         self.display.blit(self.sprite,(self.position[0],self.position[1]))
@@ -94,15 +98,17 @@ class Player:
         elif self.directionY < 0:
             self.aimingDirection = (0,-1)
 
-
+        
+        self.lastPosition[0] = self.position[0]
+        self.lastPosition[1] = self.position[1]
         self.position[0] += self.directionX * self.movementSpeed
         self.position[1] += self.directionY * self.movementSpeed
 
-        if self.position[0] > 1920 - 2 *self.size:
-            self.position[0] = 1920 - 2 * self.size
+        if self.position[0] > 1920 - 2 *self.size + 20:
+            self.position[0] = 1920 - 2 * self.size + 20
 
-        elif self.position[0] < 0 + self.size:
-            self.position[0] = 0 + self.size
+        elif self.position[0] < 0 + self.size - 20:
+            self.position[0] = 0 + self.size - 20
 
         if self.position[1] < 0 + self.size:
             self.position[1] = 0 + self.size
@@ -160,13 +166,14 @@ class Shot:
 
 
 class Room:
-    def __init__(self,map,firstQuadrant):
+    def __init__(self,map):
         self.background = pygame.Surface((1920,1080))
         self.tileSize = 120
         self.firstQuadrant = []
         self.secondQuadrant = []
         self.thirdQuadrant = []
         self.fourthQuadrant = []
+        self.doors = []
     
         for y in range(9):
             yCord = y * self.tileSize
@@ -200,7 +207,12 @@ class Room:
                 
                 elif map[y][x] == 13:
                     tile.sprite = LoadImage("wallleft.png",tile.size,False)
-                
+
+                elif map[y][x] == 14:
+                    tile.sprite = LoadImage("door.png",tile.size,True)
+                    door = Door(tile.position)
+                    self.doors.append(door)
+
                 else:
                     if (map[y][x] % 2) == 0:
                         if tile.quadrant == 1:
@@ -262,8 +274,27 @@ class Room:
                 self.background.blit(tile.sprite,tile.position)
     
 
-
-
+class Door:
+    def __init__(self,position):
+        self.position = position
+        self.size = 100
+        if self.position[0] < 1920/2:
+            self.transitionNumber = -1
+        
+        else:
+            self.transitionNumber = 1
+            self.position[0] += 20
+        
+    def checkTransision(self,player):
+        col = checkCollision(self.position,player.position,self.size,player.size)
+        if col:
+            player.roomNumber += self.transitionNumber
+            
+            if self.transitionNumber == -1:
+                player.position[0] = 1920 - 2 * player.size - 5
+            
+            elif self.transitionNumber == 1:
+                player.position[0] = 0 + player.size
 
                 
 """
@@ -289,6 +320,7 @@ class Chest:
         if self.item.sprite != None:
             display.blit(self.item.sprite,self.item.position)
 
+
 class PowerUp:
     def __init__(self,position,size):
         self.position = position
@@ -313,12 +345,14 @@ class HeartPowerUp:
         self.movementSpeed = 0
         self.special = None
 
+
 class DamagePowerUp:
     def __init__(self,size):
         self.HP = 0
         self.damage = 2
         self.movementSpeed = 0
         self.special = None
+
 
 class MovementPowerUp:
     def __init__(self,size):

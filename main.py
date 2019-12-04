@@ -7,10 +7,9 @@ from win32api import *
 
 
 
-"""
 display = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
-"""
-display = pygame.display.set_mode((1920,1080))
+
+#display = pygame.display.set_mode((1920,1080))
 
 
 
@@ -20,14 +19,23 @@ resolution = (GetSystemMetrics(0),GetSystemMetrics(1))
 playing = True
 tileSize = 120
 Map = []
+roomList = []
 
-firstQuadrant = [0]
+
 
 
 def start():
     pygame.init()
     
+def generateMaze():
 
+    maze = [
+#Lägg generare maze utått och dra då en random på hur många dörrar den ska ha för att fatta hur resten ska generera det borde vara scalable också :)
+        [0,0,0],
+        [0,0,0],
+        [0,0,0]
+    ]
+    return maze
 
 
 def generateRoom():
@@ -46,7 +54,7 @@ def generateRoom():
         [13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
         [13,0,n,0,0,0,0,0,0,0,0,0,0,n,0,11],
         [13,0,m,o,0,0,p,r,r,p,0,0,o,m,0,11],
-        [13,0,s,0,0,q,c,0,0,c,q,0,0,s,0,11],
+        [14,0,0,s,0,q,c,0,0,c,q,0,s,0,0,14],
         [13,0,m,o,0,0,p,r,r,p,0,0,o,m,0,11],
         [13,0,n,0,0,0,0,0,0,0,0,0,0,n,0,11],
         [13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
@@ -55,13 +63,17 @@ def generateRoom():
     return baseMap
 
 
+
+def blitRoom(playerRoomNumber,roomList):
+    display.blit(roomList[playerRoomNumber].background,(0,0))
+
     
 def update():
-
+   
 # kan optimeras
-    display.blit(room.background,(0,0))
+    blitRoom(player.roomNumber,roomList)
 
-
+    
 # kan optimeras
     player.checkKeyStrokes()
     
@@ -75,40 +87,55 @@ def update():
         
         elif shot.Y > resolution[1] + 500 or shot.Y < 0 - 500:
             player.shotList.remove(shot)
+
+    for door in room.doors:
+        door.checkTransision(player)
         
+  
+
     if player.quadrant == 1:
         for tile in room.firstQuadrant:
-            checkCollision(tile.position,player.position,tile.size,player.size)
-    
+            collision = checkCollision(tile.position,player.position,tile.size,player.size)
+            if collision == True:
+                player.position[0] = player.lastPosition[0]
+                player.position[1] = player.lastPosition[1]
+
     elif player.quadrant == 2:
         for tile in room.secondQuadrant:
-            checkCollision(tile.position,player.position,tile.size,player.size)
+            collision = checkCollision(tile.position,player.position,tile.size,player.size)
+            if collision == True:
+                player.position[0] = player.lastPosition[0]
+                player.position[1] = player.lastPosition[1]
 
     elif player.quadrant == 3:
         for tile in room.thirdQuadrant:
-            checkCollision(tile.position,player.position,tile.size,player.size)
+            collision = checkCollision(tile.position,player.position,tile.size,player.size)
+            if collision == True:
+                player.position[0] = player.lastPosition[0]
+                player.position[1] = player.lastPosition[1]
 
     elif player.quadrant == 4:
         for tile in room.fourthQuadrant:
-            checkCollision(tile.position,player.position,tile.size,player.size)
+            collision = checkCollision(tile.position,player.position,tile.size,player.size)
+            if collision == True:
+                player.position[0] = player.lastPosition[0]
+                player.position[1] = player.lastPosition[1]
+
 
 Map = generateRoom()
-room = Room(Map,firstQuadrant)
+room = Room(Map)
+roomList.append(room)
+
+
 lt = 0
 start()
 
-
-
-
 while playing:
     t = time.time()
-    clock.tick(200)
-
     display.fill((0,0,0))
-#    for tile in specialObjects:
-#        checkCollision(tile.position,player.position,tile.size,player.size)
 
     update()
+    room = roomList[player.roomNumber]
     pygame.display.update()
 
     for event in pygame.event.get():
@@ -116,8 +143,14 @@ while playing:
             pygame.quit()
             playing = False
             break 
+
         if keyboard.is_pressed("esc"):
             playing = False
+    
+    if keyboard.is_pressed("g"):
+        Map = generateRoom()
+        room = Room(Map)
+        roomList.append(room)
 
     elapsed = t - lt
     lt = t
