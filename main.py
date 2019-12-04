@@ -22,6 +22,10 @@ Map = []
 roomList = []
 
 
+class dumbRoom:
+    def __init__(self,position,doors):
+        self.position = position
+        self.doors = doors
 
 
 def start():
@@ -30,11 +34,19 @@ def start():
 def generateMaze():
 
     maze = [
-#Lägg generare maze utått och dra då en random på hur många dörrar den ska ha för att fatta hur resten ska generera det borde vara scalable också :)
-        [0,0,0],
-        [0,0,0],
+# generera maze utått och dra då en random på hur många dörrar den ska ha för att fatta hur resten ska generera det borde vara scalable också :)
+        [0,1,0],
+        [1,1,0],
         [0,0,0]
+
     ]
+#ta in rummens position för dörr beräkning?
+    for y in maze:
+        for x in y:
+            maze[y].remove[x]
+            test = dumbRoom([x,y],2)
+            maze[y].append()
+
     return maze
 
 
@@ -129,6 +141,7 @@ roomList.append(room)
 
 lt = 0
 start()
+#generateMaze()
 
 while playing:
     t = time.time()

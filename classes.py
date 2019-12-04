@@ -13,13 +13,21 @@ def LoadImage(Name,Size,transparency):
     Image = pygame.transform.scale(Image,(Size,Size))
     return Image
 
+def collisionPossible(firstPosition, secondPosition):
+    diff_vector = [secondPosition[0] - firstPosition[0], secondPosition[1] - firstPosition[1]]
+    length_pow2 = pow(diff_vector[0], 2) + pow(diff_vector[1], 2)
+
+    if(length_pow2 < 57600.0): # 57600 is pow 2 of 240, desired check distance
+        return True
+    return False
 
 
 def checkCollision(staticPosition,collidingPosition,staticSize,collidingSize):
-    
-    if collidingPosition[0] + collidingSize >= staticPosition[0] and collidingPosition[0] <= staticPosition[0] + staticSize:
-        if collidingPosition[1] + collidingSize >= staticPosition[1] and collidingPosition[1] <= staticPosition[1] + staticSize:
-            return True
+    col = collisionPossible(staticPosition,collidingPosition)
+    if col:
+        if collidingPosition[0] + collidingSize >= staticPosition[0] and collidingPosition[0] <= staticPosition[0] + staticSize:
+            if collidingPosition[1] + collidingSize >= staticPosition[1] and collidingPosition[1] <= staticPosition[1] + staticSize:
+                return True
 
 class Tile:
     def __init__(self,position,size):
