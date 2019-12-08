@@ -49,13 +49,15 @@ class Tile:
 
         
 class Player:
-    def __init__(self,position,movementSpeed,shootCooldown,shootingSpeed):
+    def __init__(self,position,movementSpeed,shootCooldown,shootingSpeed,shotDamage):
         self.position = position
         self.size = 100
+        self.health = 5
         self.movementSpeed = movementSpeed
         self.sprite = LoadImage("boi",1,self.position)
         self.shootCooldown = shootCooldown
         self.shootingSpeed = shootingSpeed
+        self.shotDamage = shotDamage
         self.lastShoot = 0
         self.facingDirection = 1
         self.directionX = 0
@@ -68,6 +70,7 @@ class Player:
         self.spriteList = arcade.SpriteList()
         self.spriteList.append(self.sprite)
         self.quadrant = 0
+        self.alive = True
         
     def checkKeyStrokes(self):
             
@@ -101,7 +104,7 @@ class Player:
         if keyboard.is_pressed("space"):
             if time.time() - self.lastShoot >= self.shootCooldown:
                 self.lastShoot = time.time()
-                shot = Shot(self.aimingDirection,self.shootingSpeed,self.position)
+                shot = Shot(self.aimingDirection,self.shootingSpeed,self.position,"shot",self.shotDamage)
                 self.shotList.append(shot)
                 self.shotSpriteList.append(shot.sprite)
 
@@ -109,32 +112,38 @@ class Player:
             
 
 class Shot:
-    def __init__(self,aimingDirection,speed,playerPosition):
+    def __init__(self,aimingDirection,speed,position,name,damage):
         self.direction = aimingDirection
-        self.speed = speed
-        self.X = playerPosition[0]
-        self.Y = playerPosition[1]
+        self.speed = speed * 15
+        self.X = position[0]
+        self.Y = position[1]
         self.position = [self.X,self.Y]
         rnd = random.randrange(2)
-        self.sprite = LoadImage("shot"+str(rnd),3,self.position)
-   
+        self.sprite = LoadImage(name+str(rnd),1,self.position)
+        self.size = 40
+        self.col = False
+        self.damage = damage
 
-    def updateShot(self):
+    def updateShot(self,delta_time):
         if self.direction[1] == 1:
-            self.Y += self.speed
+            self.Y += self.speed * delta_time
 
         elif self.direction[1] == -1:
-            self.Y -= self.speed
+            self.Y -= self.speed * delta_time
         
         elif self.direction[0] == 1:
-            self.X += self.speed
+            self.X += self.speed * delta_time
 
         elif self.direction[0] == -1:
-            self.X -= self.speed
+            self.X -= self.speed * delta_time
 
-
+    def checkIfHit(self,hitObject):
+        col = checkCollision(hitObject.position,[self.X,self.Y],hitObject.size,self.size)
+        if col:
+            self.col = True
+            
 class Room:
-    def __init__(self,Map):
+    def __init__(self,Map,player):
         self.tileSize = 120
         self.firstQuadrant = []
         self.secondQuadrant = []
@@ -143,7 +152,7 @@ class Room:
         self.doors = []
         self.tileSpriteList = arcade.SpriteList()
         self.collisionList = []
-        
+        self.enemyList = []
 
         for y in range(9):
             yCord = y* 120 + 60
@@ -152,6 +161,7 @@ class Room:
 
                 self.tilePosition = [xCord,yCord]
                 tile = Tile(self.tilePosition)
+               
 
                 if Map[y][x] == 0:
                     tile.sprite = LoadImage("base",1,tile.position)
@@ -221,7 +231,9 @@ class Room:
                 
                 elif Map[y][x] == 36:
                     self.collisionList.append(tile)
-                    tile.sprite = LoadImage("stone",1,tile.position)
+                    tile.sprite = LoadImage("mushroom",1,tile.position)
+                    enemy = EnemyShoot(tile.position,player,5,5,tile.sprite)
+                    self.enemyList.append(enemy)
                     
 
                 elif Map[y][x] == 38:
@@ -240,7 +252,8 @@ class Room:
                 
 
                 
-                self.tileSpriteList.append(tile.sprite) 
+                self.tileSpriteList.append(tile.sprite)
+            
             
                     
     
@@ -267,7 +280,63 @@ class Door:
             elif self.transitionNumber == 1:
                 player.position[0] = 0 + player.size
 
+
+
+
+class EnemyShoot:
+    def __init__(self,position,player,shotCooldown,shotDamage,sprite):
+        self.position = position
+        self.health = 1
+        self.size = 120
+        self.player = player
+        self.shotCooldown = shotCooldown
+        self.shotDamage = shotDamage
+        self.stillhit = 0
+        self.aimDirection = [0,0]
+        self.spriteShotList = arcade.SpriteList()
+        self.shotList = []
+        self.lastShot = 0
+        self.sprite = sprite
+
+    def hitPossible(self):
+        if self.health > 0:
+            self.aimDirection = [0,0]
+
+            if self.player.position[0] - 60 < self.position[0] + 60 and self.player.position[0] + 60 > self.position[0] - 60:
+    
+                if self.player.position[1] < self.position[1]:
+                    self.aimDirection[1] = -1
                 
+                else:
+                    self.aimDirection[1] = 1
+                if time.time() - self.lastShot >= self.shotCooldown:
+                    self.lastShot = time.time()
+                    shot = Shot(self.aimDirection,20,self.position,"enemyShot",self.shotDamage)
+                    self.spriteShotList.append(shot.sprite)
+                    self.shotList.append(shot)
+            
+            
+            
+            if self.player.position[1] - 60 < self.position[1] + 60 and self.player.position[1] + 60 > self.position[1] - 60:
+                self.stillhit += 1
+                if self.player.position[0] < self.position[0]:
+                    self.aimDirection[0] = -1
+                
+                else:
+                    self.aimDirection[0] = 1
+                
+                if time.time() - self.lastShot >= self.shotCooldown:
+                    self.lastShot = time.time()
+
+                    shot = Shot(self.aimDirection,10,self.position,"enemyShot",self.shotDamage)
+                    self.spriteShotList.append(shot.sprite)
+                    self.shotList.append(shot)
+            
+
+        
+            
+
+
 """
         
 

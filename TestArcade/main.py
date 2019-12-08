@@ -2,7 +2,7 @@ import arcade
 import keyboard
 import random
 from classes import *
-
+import pyglet
 
 
 
@@ -46,20 +46,23 @@ class MyGameWindow(arcade.Window):
         super().set_vsync(vsync)
     
     def setup(self):
-        self.player = Player([100,100],150,0.5,20)
-        self.room = Room(Map)
+        self.player = Player([100,100],150,0.5,20,10)
+        self.room = Room(Map,self.player)
         roomList.append(self.room)
+        self.set_update_rate(1/165)
+        self.set_vsync(False)
 
-        
-        
-        
     def on_draw(self):
         arcade.start_render()
-       
-    
+
         self.room.tileSpriteList.draw()
-        self.player.spriteList.draw()
-        self.player.shotSpriteList.draw()
+        if self.player.alive:
+            self.player.spriteList.draw()
+            self.player.shotSpriteList.draw()
+
+        for enemy in self.room.enemyList:
+            enemy.spriteShotList.draw()
+       
 
     def update(self, delta_time):
 
@@ -92,14 +95,85 @@ class MyGameWindow(arcade.Window):
 
 
         for shot in self.player.shotList:
-            shot.updateShot()
+            shot.updateShot(delta_time)
             shot.sprite.set_position(shot.X,shot.Y)
+
+            if shot.X > 2000 or shot.X < -100 :
+                self.player.shotList.remove(shot)
+                self.player.shotSpriteList.remove(shot.sprite)
+                
+            if shot.Y > 1100 or shot.Y < -100:
+                self.player.shotList.remove(shot)
+                self.player.shotSpriteList.remove(shot.sprite)
+
+        for shot in self.player.shotList:
+            hit = False
+            
+            for enemy in self.room.enemyList:
+                enemyDead = False
+
+                shot.checkIfHit(enemy)
+                if shot.col:
+                    enemy.health -= self.player.shotDamage
+                    hit = True
+
+                    if enemy.health < 0:
+                        enemyDead = True
+                
+                if enemyDead:
+                    self.room.enemyList.remove(enemy)
+                    self.room.tileSpriteList.remove(enemy.sprite)
+                    tile = Tile(enemy.position)
+                    self.room.tileSpriteList.append(tile.sprite)
+            
+            if hit:
+                self.player.shotList.remove(shot)
+                self.player.shotSpriteList.remove(shot.sprite)
+            
+            
+            
+            
+        
+        for enemy in self.room.enemyList:
+            enemy.hitPossible()
+
+
+
+        for enemy in self.room.enemyList:
+            for shot in enemy.shotList:
+
+                shot.updateShot(delta_time)
+                shot.sprite.set_position(shot.X,shot.Y)
+                
+                
+
+                shot.checkIfHit(self.player)
+                
+                if shot.col:
+                    enemy.shotList.remove(shot)
+                    enemy.spriteShotList.remove(shot.sprite)
+
+                    self.player.health -= shot.damage
+
+                    if self.player.health < 0:
+                        self.player.alive = False
+                        arcade.close_window()
+                
+                
+
+                if shot.X > 2000 or shot.X < -100 :
+                    enemy.shotList.remove(shot)
+                    enemy.spriteShotList.remove(shot.sprite)
+                
+                if shot.Y > 1100 or shot.Y < -100:
+                    enemy.shotList.remove(shot)
+                    enemy.spriteShotList.remove(shot.sprite)
+            
+            
         
         for door in self.room.doors:
             door.checkTransision(self.player)
         
-       
-
         
         for tile in self.room.collisionList:
             collision = checkCollision(tile.position,self.player.position,tile.size,self.player.size)
@@ -110,11 +184,11 @@ class MyGameWindow(arcade.Window):
     
         if keyboard.is_pressed("g"):
             Map = generateMap()
-            room = Room(Map)
+            room = Room(Map,self.player)
             roomList.append(room)
 
-        
-        print(1/delta_time)
+        if keyboard.is_pressed("f"):
+            print(1/delta_time)
         
 
     def on_key_press(self, key, modifiers):
@@ -130,6 +204,9 @@ class MyGameWindow(arcade.Window):
         
         if keyboard.is_pressed("w"):
             self.player.directionY = 1
+        
+        if keyboard.is_pressed("esc"):
+            arcade.close_window()
     
     def on_key_release(self, key, modifiers):
         
@@ -139,12 +216,12 @@ class MyGameWindow(arcade.Window):
         if not keyboard.is_pressed("w") and not keyboard.is_pressed("s"):
             self.player.directionY = 0
 
-        
+    
 
 
 
 
-game = MyGameWindow(1920,1080, "bruh",False)
-
+game = MyGameWindow(1920,1080, "bruh",False
+)
 game.setup()
 arcade.run()
