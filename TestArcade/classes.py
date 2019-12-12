@@ -23,8 +23,8 @@ def collisionPossible(firstPosition, secondPosition):
 def checkCollision(staticPosition,collidingPosition,staticSize,collidingSize):
     col = collisionPossible(staticPosition,collidingPosition)
     if col:
-        if collidingPosition[0] + collidingSize >= staticPosition[0] and collidingPosition[0] <= staticPosition[0] + staticSize:
-            if collidingPosition[1] + collidingSize >= staticPosition[1] and collidingPosition[1] <= staticPosition[1] + staticSize:
+        if collidingPosition[0] + collidingSize/2 >= staticPosition[0] - staticSize/2 and collidingPosition[0] <= staticPosition[0] + staticSize:
+            if collidingPosition[1] + collidingSize/2 >= staticPosition[1] - staticSize/2 and collidingPosition[1] <= staticPosition[1] + staticSize:
                 return True
 
 class Tile:
@@ -290,13 +290,14 @@ class EnemyShoot:
         self.size = 120
         self.player = player
         self.shotCooldown = shotCooldown
-        self.shotDamage = shotDamage
+        self.damage = shotDamage
         self.stillhit = 0
         self.aimDirection = [0,0]
         self.spriteShotList = arcade.SpriteList()
         self.shotList = []
         self.lastShot = 0
         self.sprite = sprite
+        self.alive = True
 
     def hitPossible(self):
         if self.health > 0:
@@ -311,7 +312,7 @@ class EnemyShoot:
                     self.aimDirection[1] = 1
                 if time.time() - self.lastShot >= self.shotCooldown:
                     self.lastShot = time.time()
-                    shot = Shot(self.aimDirection,20,self.position,"enemyShot",self.shotDamage)
+                    shot = Shot(self.aimDirection,20,self.position,"enemyShot",self.damage)
                     self.spriteShotList.append(shot.sprite)
                     self.shotList.append(shot)
             
@@ -328,7 +329,7 @@ class EnemyShoot:
                 if time.time() - self.lastShot >= self.shotCooldown:
                     self.lastShot = time.time()
 
-                    shot = Shot(self.aimDirection,10,self.position,"enemyShot",self.shotDamage)
+                    shot = Shot(self.aimDirection,10,self.position,"enemyShot",self.damage)
                     self.spriteShotList.append(shot.sprite)
                     self.shotList.append(shot)
             
@@ -389,7 +390,7 @@ class HeartPowerUp:
 class DamagePowerUp:
     def __init__(self,size):
         self.HP = 0
-        self.damage = 2
+        self.damage = 0.5
         self.movementSpeed = 0
         self.special = None
 

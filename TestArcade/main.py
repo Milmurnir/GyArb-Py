@@ -5,6 +5,14 @@ from classes import *
 import pyglet
 
 
+def generateMaze():
+
+    maze = [
+        [],
+        [],
+        [],
+    ]
+
 
 def generateMap():
     m = random.randint(28,29)
@@ -51,6 +59,7 @@ class MyGameWindow(arcade.Window):
         roomList.append(self.room)
         self.set_update_rate(1/165)
         self.set_vsync(False)
+        self.enemiesAlive = False
 
     def on_draw(self):
         arcade.start_render()
@@ -65,6 +74,11 @@ class MyGameWindow(arcade.Window):
        
 
     def update(self, delta_time):
+        if len(self.room.enemyList) > 0:
+            self.enemiesAlive = True
+        
+        else:
+            self.enemiesAlive = False
 
         self.room = roomList[self.player.roomNumber]
         
@@ -75,9 +89,7 @@ class MyGameWindow(arcade.Window):
         self.player.position[1] += self.player.directionY * self.player.movementSpeed * delta_time
 
         self.player.checkKeyStrokes()
-
         self.player.sprite.set_position(self.player.position[0],self.player.position[1])
-
         self.player.spriteList.update()
         self.room.tileSpriteList.update()
 
@@ -110,7 +122,7 @@ class MyGameWindow(arcade.Window):
             hit = False
             
             for enemy in self.room.enemyList:
-                enemyDead = False
+                
 
                 shot.checkIfHit(enemy)
                 if shot.col:
@@ -118,9 +130,9 @@ class MyGameWindow(arcade.Window):
                     hit = True
 
                     if enemy.health < 0:
-                        enemyDead = True
+                        enemy.alive = False
                 
-                if enemyDead:
+                if not enemy.alive:
                     self.room.enemyList.remove(enemy)
                     self.room.tileSpriteList.remove(enemy.sprite)
                     tile = Tile(enemy.position)
@@ -130,23 +142,22 @@ class MyGameWindow(arcade.Window):
                 self.player.shotList.remove(shot)
                 self.player.shotSpriteList.remove(shot.sprite)
             
-            
-            
-            
-        
+
         for enemy in self.room.enemyList:
             enemy.hitPossible()
 
 
-
         for enemy in self.room.enemyList:
+
+            col = checkCollision(enemy.position,self.player.position,enemy.size +10,self.player.size)
+            if col:
+                print("ouch")
+                self.player.health -= enemy.damage
+
             for shot in enemy.shotList:
 
                 shot.updateShot(delta_time)
                 shot.sprite.set_position(shot.X,shot.Y)
-                
-                
-
                 shot.checkIfHit(self.player)
                 
                 if shot.col:
@@ -155,12 +166,8 @@ class MyGameWindow(arcade.Window):
 
                     self.player.health -= shot.damage
 
-                    if self.player.health < 0:
-                        self.player.alive = False
-                        arcade.close_window()
+                    
                 
-                
-
                 if shot.X > 2000 or shot.X < -100 :
                     enemy.shotList.remove(shot)
                     enemy.spriteShotList.remove(shot.sprite)
@@ -170,9 +177,13 @@ class MyGameWindow(arcade.Window):
                     enemy.spriteShotList.remove(shot.sprite)
             
             
+        if self.enemiesAlive == False:
+            for door in self.room.doors:
+                door.checkTransision(self.player)
         
-        for door in self.room.doors:
-            door.checkTransision(self.player)
+        if self.player.health < 0:
+            self.player.alive = False
+            arcade.close_window()
         
         
         for tile in self.room.collisionList:
@@ -221,7 +232,6 @@ class MyGameWindow(arcade.Window):
 
 
 
-game = MyGameWindow(1920,1080, "bruh",False
-)
+game = MyGameWindow(1920,1080, "bruh",False)
 game.setup()
 arcade.run()
