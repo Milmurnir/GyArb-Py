@@ -5,13 +5,33 @@ from classes import *
 import pyglet
 
 
-def generateMaze():
+def generateMaze(player):
 
     maze = [
-        [],
-        [],
-        [],
+        [0,0,0],
+        [0,0,0],
+        [0,0,0],
     ]
+    
+    xCord = random.randint(0,len(maze)-1)
+    yCord = random.randint(0,len(maze)-1)
+
+    player.worldCord[0] = xCord
+    player.worldCord[1] = yCord
+
+    maze[yCord].pop(xCord)
+
+    Map = generateMap()
+
+    room = Room(Map,player)
+    
+
+    maze[yCord].insert(xCord, room)
+    
+    
+
+
+    return maze
 
 
 def generateMap():
@@ -26,7 +46,7 @@ def generateMap():
 
     baseMap = [
 
-        [1,10,10,10,10,10,10,10,10,10,10,10,10,10,10,2],
+        [1,10,10,10,10,10,10,14,10,10,10,10,10,10,10,2],
         [13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
         [13,0,n,0,0,0,0,0,0,0,0,0,0,n,0,11],
         [13,0,m,o,0,0,p,r,r,p,0,0,o,m,0,11],
@@ -40,8 +60,8 @@ def generateMap():
 
 
 movementSpeed = 100
-Map = generateMap()
-roomList = []
+
+
 
 
 class MyGameWindow(arcade.Window):
@@ -49,17 +69,19 @@ class MyGameWindow(arcade.Window):
         super().__init__(width,height,title,fullscreen)
         arcade.set_background_color(arcade.color.BLACK)
 
-
-    def set_vsync(self,vsync):
-        super().set_vsync(vsync)
     
     def setup(self):
         self.player = Player([100,100],150,0.5,20,10)
-        self.room = Room(Map,self.player)
-        roomList.append(self.room)
+        
+        
         self.set_update_rate(1/165)
         self.set_vsync(False)
+        
+
         self.enemiesAlive = False
+
+
+        self.maze = generateMaze(self.player)
 
     def on_draw(self):
         arcade.start_render()
@@ -74,14 +96,15 @@ class MyGameWindow(arcade.Window):
        
 
     def update(self, delta_time):
+        self.room = self.maze[self.player.worldCord[1]][self.player.worldCord[0]]
         if len(self.room.enemyList) > 0:
             self.enemiesAlive = True
         
         else:
             self.enemiesAlive = False
 
-        self.room = roomList[self.player.roomNumber]
-        
+
+
         self.player.lastPosition[0] = self.player.position[0]
         self.player.lastPosition[1] = self.player.position[1]
 
@@ -151,7 +174,6 @@ class MyGameWindow(arcade.Window):
 
             col = checkCollision(enemy.position,self.player.position,enemy.size +10,self.player.size)
             if col:
-                print("ouch")
                 self.player.health -= enemy.damage
 
             for shot in enemy.shotList:
@@ -193,10 +215,6 @@ class MyGameWindow(arcade.Window):
                 self.player.position[1] = self.player.lastPosition[1]
 
     
-        if keyboard.is_pressed("g"):
-            Map = generateMap()
-            room = Room(Map,self.player)
-            roomList.append(room)
 
         if keyboard.is_pressed("f"):
             print(1/delta_time)
@@ -227,11 +245,7 @@ class MyGameWindow(arcade.Window):
         if not keyboard.is_pressed("w") and not keyboard.is_pressed("s"):
             self.player.directionY = 0
 
-    
 
-
-
-
-game = MyGameWindow(1920,1080, "bruh",False)
+game = MyGameWindow(1920,1080, "bruh",True)
 game.setup()
 arcade.run()

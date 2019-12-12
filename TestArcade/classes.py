@@ -64,12 +64,11 @@ class Player:
         self.directionY = 0
         self.aimingDirection = (0,1)
         self.lastPosition = [0,0]
-        self.roomNumber = 0
+        self.worldCord = [0,0]
         self.shotList = []
         self.shotSpriteList = arcade.SpriteList()
         self.spriteList = arcade.SpriteList()
         self.spriteList.append(self.sprite)
-        self.quadrant = 0
         self.alive = True
         
     def checkKeyStrokes(self):
@@ -145,10 +144,6 @@ class Shot:
 class Room:
     def __init__(self,Map,player):
         self.tileSize = 120
-        self.firstQuadrant = []
-        self.secondQuadrant = []
-        self.thirdQuadrant = []
-        self.fourthQuadrant = []
         self.doors = []
         self.tileSpriteList = arcade.SpriteList()
         self.collisionList = []
@@ -194,20 +189,7 @@ class Room:
                     tile.sprite = LoadImage("door",7.5,tile.position)
                     door = Door(tile.position)
                     self.doors.append(door)
-            
-                
-                if (Map[y][x] % 2) == 0:
-                    if tile.quadrant == 1:
-                        self.firstQuadrant.append(tile)
-                    
-                    elif tile.quadrant == 2:
-                        self.secondQuadrant.append(tile)
-                    
-                    elif tile.quadrant == 3:
-                        self.thirdQuadrant.append(tile)
-                    
-                    elif tile.quadrant == 4:
-                        self.fourthQuadrant.append(tile)
+        
 
                 if Map[y][x] == 28:
                     self.collisionList.append(tile)
@@ -272,7 +254,7 @@ class Door:
     def checkTransision(self,player):
         col = checkCollision(self.position,player.position,self.size,player.size)
         if col:
-            player.roomNumber += self.transitionNumber
+            player.worldCord[0] += self.transitionNumber
             
             if self.transitionNumber == -1:
                 player.position[0] = 1920 - 2 * player.size - 5
