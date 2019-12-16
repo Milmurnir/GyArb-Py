@@ -32,19 +32,7 @@ class Tile:
         self.position = position
         self.size = 120
         self.sprite = LoadImage("base",1,self.position)
-        self.quadrant = 0
-
-        if self.position[0] < 1920/2 and self.position[1] > 1080/2:
-            self.quadrant = 1
-        
-        elif self.position[0] > 1920/2 and self.position[1] > 1080/2:
-            self.quadrant = 2  
-        
-        elif self.position[0] < 1920/2 and self.position[1] < 1080/2:
-            self.quadrant = 3
-        
-        elif self.position[0] > 1920/2 and self.position[1] < 1080/2:
-            self.quadrant = 4        
+            
   
 
         
@@ -148,11 +136,12 @@ class Room:
         self.tileSpriteList = arcade.SpriteList()
         self.collisionList = []
         self.enemyList = []
+        self.doorExist = [False,False,False,False]
 
         for y in range(9):
             yCord = y* 120 + 60
-            for x in range(16):
-                xCord = x * 120 + 60
+            for x in range(15):
+                xCord = x * 120 + 180
 
                 self.tilePosition = [xCord,yCord]
                 tile = Tile(self.tilePosition)
@@ -186,10 +175,27 @@ class Room:
                     tile.sprite = LoadImage("wallleft",1,tile.position)
                 
                 elif Map[y][x] == 14:
-                    tile.sprite = LoadImage("door",7.5,tile.position)
-                    door = Door(tile.position)
-                    self.doors.append(door)
+                    rnd = random.randint(0,1)
+                    if rnd == 0:
+
+
+                        tile.sprite = LoadImage("door",7.5,tile.position)
+                        door = Door(tile.position)
+                        self.doors.append(door)
+
+                        if tile.position[0] > 960 and tile.position[1] > 100 and tile.position[1] < 900:
+                            self.doorExist[0] = True
+                        
+                        if tile.position[0] < 960 and tile.position[1] > 100 and tile.position[1] < 900:
+                            self.doorExist[2] = True
         
+                        if tile.position[1] > 540 and tile.position[0] > 300 and tile.position[0] < 1500:
+                            self.doorExist[3] = True
+
+                        if tile.position[1] < 540 and tile.position[0] > 300 and tile.position[0] < 1500:
+                            self.doorExist[1] = True
+                        
+
 
                 if Map[y][x] == 28:
                     self.collisionList.append(tile)
@@ -235,6 +241,7 @@ class Room:
 
                 
                 self.tileSpriteList.append(tile.sprite)
+                
             
             
                     

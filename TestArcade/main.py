@@ -24,9 +24,15 @@ def generateMaze(player):
     Map = generateMap()
 
     room = Room(Map,player)
-    
 
     maze[yCord].insert(xCord, room)
+
+    if  room.doorExist[0] and xCord != 2:
+        Map = generateMap()
+        room = Room(Map,player)
+
+        maze[yCord].pop(xCord)
+        maze[yCord].insert(xCord, room)
     
     
 
@@ -46,15 +52,15 @@ def generateMap():
 
     baseMap = [
 
-        [1,10,10,10,10,10,10,14,10,10,10,10,10,10,10,2],
-        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
-        [13,0,n,0,0,0,0,0,0,0,0,0,0,n,0,11],
+        [1,10,10,10,10,10,10,14,10,10,10,10,10,10,2],
+        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
+        [13,0,n,0,0,0,0,0,0,0,0,0,n,0,11],
         [13,0,m,o,0,0,p,r,r,p,0,0,o,m,0,11],
-        [14,0,0,s,0,q,c,0,0,c,q,0,s,0,0,14],
+        [14,0,0,s,0,q,c,0,c,q,0,s,0,0,14],
         [13,0,m,o,0,0,p,r,r,p,0,0,o,m,0,11],
-        [13,0,n,0,0,0,0,0,0,0,0,0,0,n,0,11],
-        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
-        [4,12,12,12,12,12,12,12,12,12,12,12,12,12,12,3]
+        [13,0,n,0,0,0,0,0,0,0,0,0,n,0,11],
+        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
+        [4,12,12,12,12,12,14,12,12,12,12,12,12,12,3]
     ]
     return baseMap
 
@@ -74,7 +80,7 @@ class MyGameWindow(arcade.Window):
         self.player = Player([100,100],150,0.5,20,10)
         
         
-        self.set_update_rate(1/165)
+        
         self.set_vsync(False)
         
 
@@ -102,7 +108,8 @@ class MyGameWindow(arcade.Window):
         
         else:
             self.enemiesAlive = False
-
+        
+       
 
 
         self.player.lastPosition[0] = self.player.position[0]
