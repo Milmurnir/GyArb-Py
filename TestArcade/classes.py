@@ -174,26 +174,26 @@ class Room:
                 elif Map[y][x] == 13:
                     tile.sprite = LoadImage("wallleft",1,tile.position)
                 
-                elif Map[y][x] == 14:
-                    rnd = random.randint(0,1)
-                    if rnd == 0:
 
-
-                        tile.sprite = LoadImage("door",7.5,tile.position)
-                        door = Door(tile.position)
-                        self.doors.append(door)
-
-                        if tile.position[0] > 960 and tile.position[1] > 100 and tile.position[1] < 900:
-                            self.doorExist[0] = True
-                        
-                        if tile.position[0] < 960 and tile.position[1] > 100 and tile.position[1] < 900:
-                            self.doorExist[2] = True
-        
-                        if tile.position[1] > 540 and tile.position[0] > 300 and tile.position[0] < 1500:
-                            self.doorExist[3] = True
-
-                        if tile.position[1] < 540 and tile.position[0] > 300 and tile.position[0] < 1500:
-                            self.doorExist[1] = True
+                elif Map[y][x] == 70:
+                    tile.sprite = LoadImage("door",7.5,tile.position)
+                    door = Door(tile.position)
+                    self.doors.append(door)
+                
+                elif Map[y][x] == 71:
+                    tile.sprite = LoadImage("door",7.5,tile.position)
+                    door = Door(tile.position)
+                    self.doors.append(door)
+                
+                elif Map[y][x] == 72:
+                    tile.sprite = LoadImage("door",7.5,tile.position)
+                    door = Door(tile.position)
+                    self.doors.append(door)
+                
+                elif Map[y][x] == 73:
+                    tile.sprite = LoadImage("door",7.5,tile.position)
+                    door = Door(tile.position)
+                    self.doors.append(door)
                         
 
 
@@ -250,7 +250,7 @@ class Room:
 class Door:
     def __init__(self,position):
         self.position = position
-        self.size = 100
+        self.size = 140
         if self.position[0] < 1920/2:
             self.transitionNumber = -1
         
@@ -267,7 +267,7 @@ class Door:
                 player.position[0] = 1920 - 2 * player.size - 5
             
             elif self.transitionNumber == 1:
-                player.position[0] = 0 + player.size
+                player.position[0] = 275
 
 
 

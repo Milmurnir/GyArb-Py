@@ -217,9 +217,16 @@ class Room:
                     tile.sprite = LoadImage("wallleft.png",tile.size,False)
 
                 elif map[y][x] == 14:
-                    tile.sprite = LoadImage("door.png",tile.size,True)
-                    door = Door(tile.position)
-                    self.doors.append(door)
+                    rnd = random.randint(1,4)
+                    if rnd == 1:
+                        tile.sprite = LoadImage("door.png",tile.size,True)
+                        door = Door(tile.position)
+                        self.doors.append(door)
+                
+                elif map[y][x] == 70:
+                    print("Forced door")
+                
+
 
                 else:
                     if (map[y][x] % 2) == 0:

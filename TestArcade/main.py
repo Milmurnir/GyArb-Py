@@ -1,3 +1,4 @@
+
 import arcade
 import keyboard
 import random
@@ -6,41 +7,29 @@ import pyglet
 
 
 def generateMaze(player):
+    
 
     maze = [
         [0,0,0],
         [0,0,0],
-        [0,0,0],
+        [0,0,0]
     ]
     
-    xCord = random.randint(0,len(maze)-1)
-    yCord = random.randint(0,len(maze)-1)
+    xCord = random.randint(0,2)
+    yCord = random.randint(0,2)
 
     player.worldCord[0] = xCord
     player.worldCord[1] = yCord
 
-    maze[yCord].pop(xCord)
+    generateRoom(maze,player,[xCord,yCord],[False,False,False,False])
 
-    Map = generateMap()
-
-    room = Room(Map,player)
-
-    maze[yCord].insert(xCord, room)
-
-    if  room.doorExist[0] and xCord != 2:
-        Map = generateMap()
-        room = Room(Map,player)
-
-        maze[yCord].pop(xCord)
-        maze[yCord].insert(xCord, room)
-    
-    
 
 
     return maze
 
 
-def generateMap():
+def generateRoom(maze,player,cords,forcedDoors=[False,False,False,False]):
+
     m = random.randint(28,29)
     n = random.randint(30,31)
     o = random.randint(32,33)
@@ -50,22 +39,84 @@ def generateMap():
     s = random.randint(40,41)
     c = random.randint(42,43)
 
+    d1 = 14
+    d2 = 14
+    d3 = 14
+    d4 = 14
+
+    if forcedDoors[0]:
+        d1 = 70
+    
+    else:
+        rnd = random.randint(1,2)
+        if rnd == 1:
+            d1 = 70
+    
+    if forcedDoors[1]:
+        d2 = 71
+    
+    else:
+        rnd = random.randint(1,2)
+        if rnd == 1:
+            d2 = 71
+    
+    if forcedDoors[2]:
+        d3 = 72
+    
+    else:
+        rnd = random.randint(1,2)
+        if rnd == 1:
+            d3 = 72
+    
+    if forcedDoors[3]:
+        d4 = 73
+    
+    else:
+        rnd = random.randint(1,2)
+        if rnd == 1:
+            d4 = 73
+    
+
+
     baseMap = [
-
-        [1,10,10,10,10,10,10,14,10,10,10,10,10,10,2],
+        [1,10,10,10,10,10,10,d4,10,10,10,10,10,10,2],
         [13,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
         [13,0,n,0,0,0,0,0,0,0,0,0,n,0,11],
-        [13,0,m,o,0,0,p,r,r,p,0,0,o,m,0,11],
-        [14,0,0,s,0,q,c,0,c,q,0,s,0,0,14],
-        [13,0,m,o,0,0,p,r,r,p,0,0,o,m,0,11],
+        [13,0,m,o,0,0,p,r,r,p,0,0,o,m,11],
+        [d3,0,0,s,0,q,c,0,c,q,0,s,0,0,d1],
+        [13,0,m,o,0,0,p,r,r,p,0,0,o,m,11],
         [13,0,n,0,0,0,0,0,0,0,0,0,n,0,11],
         [13,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
-        [4,12,12,12,12,12,14,12,12,12,12,12,12,12,3]
+        [4,12,12,12,12,12,12,d2,12,12,12,12,12,12,3]
     ]
-    return baseMap
+
+    
+    
+    room = Room(baseMap,player)
+
+    maze[cords[1]].pop(cords[0])
+
+    maze[cords[1]].insert(cords[0],room)
+
+    
+
+    
+    if d1 == 70:
+        if (cords[0] + 1) != 3:
+            generateRoom(maze,player,[cords[0]+1,cords[1]],[False,False,True,False])
+
+    if d2 == 71:
+        if (cords[1] - 1) != -1:
+            generateRoom(maze,player,[cords[0],cords[1]-1],[False,False,False,True])
 
 
-movementSpeed = 100
+    if d3 == 72:
+        if (cords[0] - 1) != -1:
+            generateRoom(maze,player,[cords[0]-1,cords[1]],[True,False,False,False])
+
+    if d4 == 73:
+        if (cords[1] + 1) != 3:
+            generateRoom(maze,player,[cords[0],cords[1]+1],[False,True,False,False])
 
 
 
@@ -77,7 +128,7 @@ class MyGameWindow(arcade.Window):
 
     
     def setup(self):
-        self.player = Player([100,100],150,0.5,20,10)
+        self.player = Player([100,100],500,0.5,20,100)
         
         
         
@@ -103,6 +154,10 @@ class MyGameWindow(arcade.Window):
 
     def update(self, delta_time):
         self.room = self.maze[self.player.worldCord[1]][self.player.worldCord[0]]
+
+        print(self.maze)
+
+
         if len(self.room.enemyList) > 0:
             self.enemiesAlive = True
         
