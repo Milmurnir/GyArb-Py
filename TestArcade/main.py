@@ -44,36 +44,46 @@ def generateRoom(maze,player,cords,forcedDoors=[False,False,False,False]):
     d3 = 14
     d4 = 14
 
+    forcedD1 = False
+    forcedD2 = False
+    forcedD3 = False
+    forcedD4 = False
+
+
     if forcedDoors[0]:
         d1 = 70
+        forcedD1 = True
     
     else:
         rnd = random.randint(1,2)
-        if rnd == 1:
+        if rnd == 1 and cords[0] + 1 != 3:
             d1 = 70
     
     if forcedDoors[1]:
         d2 = 71
-    
+        forcedD2 = True
+
     else:
         rnd = random.randint(1,2)
-        if rnd == 1:
+        if rnd == 1 and cords[1] - 1 != -1:
             d2 = 71
     
     if forcedDoors[2]:
         d3 = 72
+        forcedD3 = True
     
     else:
         rnd = random.randint(1,2)
-        if rnd == 1:
+        if rnd == 1 and cords[0] - 1 != -1:
             d3 = 72
     
     if forcedDoors[3]:
         d4 = 73
+        forcedD4 = True
     
     else:
         rnd = random.randint(1,2)
-        if rnd == 1:
+        if rnd == 1 and cords[1] + 1 != 3:
             d4 = 73
     
 
@@ -81,11 +91,11 @@ def generateRoom(maze,player,cords,forcedDoors=[False,False,False,False]):
     baseMap = [
         [1,10,10,10,10,10,10,d4,10,10,10,10,10,10,2],
         [13,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
-        [13,0,n,0,0,0,0,0,0,0,0,0,n,0,11],
-        [13,0,m,o,0,0,p,r,r,p,0,0,o,m,11],
-        [d3,0,0,s,0,q,c,0,c,q,0,s,0,0,d1],
-        [13,0,m,o,0,0,p,r,r,p,0,0,o,m,11],
-        [13,0,n,0,0,0,0,0,0,0,0,0,n,0,11],
+        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
+        [13,0,0,0,0,0,0,o,0,0,0,0,0,0,11],
+        [d3,0,0,0,0,0,n,m,n,0,0,0,0,0,d1],
+        [13,0,0,0,0,0,0,o,0,0,0,0,0,0,11],
+        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
         [13,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
         [4,12,12,12,12,12,12,d2,12,12,12,12,12,12,3]
     ]
@@ -101,20 +111,21 @@ def generateRoom(maze,player,cords,forcedDoors=[False,False,False,False]):
     
 
     
-    if d1 == 70:
+    if d1 == 70 and not forcedD1:
+
         if (cords[0] + 1) != 3:
             generateRoom(maze,player,[cords[0]+1,cords[1]],[False,False,True,False])
 
-    if d2 == 71:
+    if d2 == 71 and not forcedD2:
         if (cords[1] - 1) != -1:
             generateRoom(maze,player,[cords[0],cords[1]-1],[False,False,False,True])
 
 
-    if d3 == 72:
+    if d3 == 72 and not forcedD3:
         if (cords[0] - 1) != -1:
             generateRoom(maze,player,[cords[0]-1,cords[1]],[True,False,False,False])
 
-    if d4 == 73:
+    if d4 == 73 and not forcedD4:
         if (cords[1] + 1) != 3:
             generateRoom(maze,player,[cords[0],cords[1]+1],[False,True,False,False])
 
@@ -130,7 +141,7 @@ class MyGameWindow(arcade.Window):
     def setup(self):
         self.player = Player([100,100],500,0.5,20,100)
         
-        
+        self.movingEnemy = MovingEnemy([0,0],120)
         
         self.set_vsync(False)
         
@@ -139,6 +150,11 @@ class MyGameWindow(arcade.Window):
 
 
         self.maze = generateMaze(self.player)
+
+        for y in self.maze:
+            print(y)
+
+        print(self.player.worldCord)
 
     def on_draw(self):
         arcade.start_render()
@@ -151,18 +167,22 @@ class MyGameWindow(arcade.Window):
         for enemy in self.room.enemyList:
             enemy.spriteShotList.draw()
        
+        self.movingEnemy.spriteList.draw()
+       
 
     def update(self, delta_time):
         self.room = self.maze[self.player.worldCord[1]][self.player.worldCord[0]]
-
-        print(self.maze)
-
+        
+        self.movingEnemy.moveEnemyToPlayer(self.player)
+        self.movingEnemy.spriteList[0].set_position(self.movingEnemy.position[0],self.movingEnemy.position[1])
 
         if len(self.room.enemyList) > 0:
             self.enemiesAlive = True
         
         else:
             self.enemiesAlive = False
+        
+
         
        
 
@@ -177,6 +197,7 @@ class MyGameWindow(arcade.Window):
         self.player.sprite.set_position(self.player.position[0],self.player.position[1])
         self.player.spriteList.update()
         self.room.tileSpriteList.update()
+        self.movingEnemy.spriteList.update()
 
         if self.player.position[0] > 1920 - 155:
             self.player.position[0] = 1920 - 155

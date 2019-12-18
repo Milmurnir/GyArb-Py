@@ -3,6 +3,7 @@ import pygame
 import random
 import keyboard
 import arcade
+import math
 from win32api import * 
 
 def LoadImage(Name,size,position):
@@ -251,23 +252,46 @@ class Door:
     def __init__(self,position):
         self.position = position
         self.size = 140
-        if self.position[0] < 1920/2:
-            self.transitionNumber = -1
+        self.xOrYDoor = None
+
+        if self.position[0] < 300:
+            self.transitionNumberX = -1
+            self.xOrYDoor = 0
         
-        else:
-            self.transitionNumber = 1
-            self.position[0] += 20
+        elif self.position[0] > 1700:
+            self.transitionNumberX = 1
+            self.xOrYDoor = 0
+
+
+        if self.position[1] < 300:
+            self.transitionNumberY = 1
+            self.xOrYDoor = 1
+        
+        elif self.position[1] > 700:
+            self.transitionNumberY = -1
+            self.xOrYDoor = 1
         
     def checkTransision(self,player):
         col = checkCollision(self.position,player.position,self.size,player.size)
         if col:
-            player.worldCord[0] += self.transitionNumber
+            if self.xOrYDoor == 0:
+                player.worldCord[0] += self.transitionNumberX
+
+                if self.transitionNumberX == -1:
+                    player.position[0] = 1920 - 2 * player.size - 5
+                
+                else:
+                    player.position[0] = 360
             
-            if self.transitionNumber == -1:
-                player.position[0] = 1920 - 2 * player.size - 5
+            elif self.xOrYDoor == 1:
+                player.worldCord[1] += self.transitionNumberY
             
-            elif self.transitionNumber == 1:
-                player.position[0] = 275
+                if self.transitionNumberY == -1:
+                    player.position[1] = 240
+                    
+                else:
+                    player.position[1] = 1080 - 240
+                
 
 
 
@@ -324,8 +348,26 @@ class EnemyShoot:
             
 
         
-            
+class MovingEnemy:
+    def __init__(self,position,size):
+        self.position = position
+        self.size = size
+        self.spriteList = arcade.SpriteList()
+        self.sprite = LoadImage("enemy0",3.75,self.position)
+        self.spriteList.append(self.sprite)
+        self.moveVector = [0,0]
 
+    def moveEnemyToPlayer(self,player):
+        self.moveVector[0] = player.position[0] - self.position[0]
+        self.moveVector[1] = player.position[1] - self.position[1]
+        
+        self.length = math.sqrt(self.moveVector[0]**2+self.moveVector[1]**2)
+        self.moveVector[0] /= self.length
+        self.moveVector[1] /= self.length
+
+        self.position[0] += self.moveVector[0] * 1
+        self.position[1] += self.moveVector[1] * 1
+        print(self.position)
 
 """
         
