@@ -151,13 +151,13 @@ class MyGameWindow(arcade.Window):
 
         self.maze = generateMaze(self.player)
 
-        for y in self.maze:
-            print(y)
+        
 
-        print(self.player.worldCord)
+        
 
     def on_draw(self):
         arcade.start_render()
+
 
         self.room.tileSpriteList.draw()
         if self.player.alive:
@@ -168,6 +168,7 @@ class MyGameWindow(arcade.Window):
             enemy.spriteShotList.draw()
        
         self.movingEnemy.spriteList.draw()
+        
        
 
     def update(self, delta_time):
@@ -329,6 +330,6 @@ class MyGameWindow(arcade.Window):
             self.player.directionY = 0
 
 
-game = MyGameWindow(1920,1080, "bruh",True)
+game = MyGameWindow(1920,1080, "bruh",False)
 game.setup()
 arcade.run()

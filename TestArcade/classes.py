@@ -4,6 +4,7 @@ import random
 import keyboard
 import arcade
 import math
+import time
 from win32api import * 
 
 def LoadImage(Name,size,position):
@@ -365,9 +366,61 @@ class MovingEnemy:
         self.moveVector[0] /= self.length
         self.moveVector[1] /= self.length
 
-        self.position[0] += self.moveVector[0] * 1
-        self.position[1] += self.moveVector[1] * 1
-        print(self.position)
+       
+        self.position[0] += self.moveVector[0] * 2
+        self.position[1] += self.moveVector[1] * 2
+
+        self.vectorPos = [0,0]
+        
+        i = 0
+
+        while True:
+            i += 1
+            enemyPos = [0]
+            enemyPos[0] = self.position[0]
+            
+            
+
+            if enemyPos[0] + self.moveVector[0] * 1 + i > player.position[0] and enemyPos[0] + self.moveVector[0] * 1 + i < player.position[0] + player.size:
+                print("hitX")
+                self.vectorPos[0] = enemyPos[0]
+                break
+            else:
+                enemyPos[0] += self.moveVector[0] * 1 + i
+
+            if i > 200:
+                break
+        
+        o = 0
+
+        while True:
+            o += 1
+            enemyPos = [0]
+            enemyPos[0] = self.position[1]
+            
+            if enemyPos[0] + self.moveVector[1] * 1 + i > player.position[1] and enemyPos[0] + self.moveVector[1] * 1 + i < player.position[1] + player.size:
+                print("hitY")
+                self.vectorPos[1] = enemyPos[0]
+                break
+            else:
+                enemyPos[0] += self.moveVector[1] * 1 + i
+
+            if o > 200:
+                break
+        
+        col = checkCollision(self.vectorPos,player.position,50,player.size)
+        if col:
+            print("found ya bitch")
+
+
+
+                
+    
+        
+
+
+
+        
 
 """
         
