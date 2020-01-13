@@ -6,12 +6,25 @@ import arcade
 import math
 import time
 from win32api import * 
+import os
 
-def LoadImage(Name,size,position):
-    sprite = arcade.Sprite("C:\Projects\GyArb-Py\TestArcade\Images"+"\\"+Name+".png",size)
+def LoadImage(Name,size,position,animation = False,animationFolder = ""):
+    if animation:
+        sprite = arcade.Sprite("C:\Projects\GyArb-Py\TestArcade\Animations"+"\\"+animationFolder+"\\"+Name,size)
+    else:
+        sprite = arcade.Sprite("C:\Projects\GyArb-Py\TestArcade\Images"+"\\"+Name+".png",size)
     sprite.center_x += position[0]
     sprite.center_y += position[1]
     return sprite
+
+def LoadAnimaitonTree(Directory,size,spriteList,position):
+    for pic in os.listdir(Directory):
+        sprite = arcade.Sprite(Directory+"\\"+pic,size)
+        sprite.center_x += position[0]
+        sprite.center_y += position[1]
+        spriteList.append(sprite)
+    
+
 
 def collisionPossible(firstPosition, secondPosition):
     diff_vector = [secondPosition[0] - firstPosition[0], secondPosition[1] - firstPosition[1]]
@@ -349,75 +362,125 @@ class EnemyShoot:
             
 
         
-class MovingEnemy:
-    def __init__(self,position,size):
+class FlyingEnemy:
+    def __init__(self,position,size,cooldown):
         self.position = position
         self.size = size
         self.spriteList = arcade.SpriteList()
-        self.sprite = LoadImage("enemy0",3.75,self.position)
-        self.spriteList.append(self.sprite)
+        
         self.moveVector = [0,0]
+        self.targetPos = [0,0]
+        self.cooldown = cooldown
+        self.lastAttack = 0
+        self.enableToMove = True
+
+        for i in os.listdir("C:\Projects\GyArb-Py\TestArcade\Animations\BombFlying"):
+            sprite = LoadImage(str(i),3,self.position,True,"BombFlying")
+            self.spriteList.append(sprite)
+        
+        self.animationPlayer = AnimationPlayer(self.spriteList,10)
 
     def moveEnemyToPlayer(self,player):
-        self.moveVector[0] = player.position[0] - self.position[0]
-        self.moveVector[1] = player.position[1] - self.position[1]
         
-        self.length = math.sqrt(self.moveVector[0]**2+self.moveVector[1]**2)
-        self.moveVector[0] /= self.length
-        self.moveVector[1] /= self.length
+        self.animationPlayer.runAnimation()
 
-       
-        self.position[0] += self.moveVector[0] * 2
-        self.position[1] += self.moveVector[1] * 2
-
-        self.vectorPos = [0,0]
+        if time.time() - self.lastAttack >= self.cooldown:
+            self.lastAttack = time.time()
+            self.enableToMove = True
+            self.targetPos[0] = player.position[0]
+            self.targetPos[1] = player.position[1]
         
-        i = 0
-
-        while True:
-            i += 1
-            enemyPos = [0]
-            enemyPos[0] = self.position[0]
+        if self.enableToMove:
+        
+            self.tempPosition = [0,0]
+            self.moveVector[0] = self.targetPos[0] - self.position[0]
+            self.moveVector[1] = self.targetPos[1] - self.position[1]
             
-            
+            self.length = math.sqrt(self.moveVector[0]**2+self.moveVector[1]**2)
+            self.moveVector[0] /= self.length
+            self.moveVector[1] /= self.length
 
-            if enemyPos[0] + self.moveVector[0] * 1 + i > player.position[0] and enemyPos[0] + self.moveVector[0] * 1 + i < player.position[0] + player.size:
-                print("hitX")
-                self.vectorPos[0] = enemyPos[0]
-                break
-            else:
-                enemyPos[0] += self.moveVector[0] * 1 + i
-
-            if i > 200:
-                break
         
-        o = 0
+            self.position[0] += self.moveVector[0] * 10
+            self.position[1] += self.moveVector[1] * 10
 
-        while True:
-            o += 1
-            enemyPos = [0]
-            enemyPos[0] = self.position[1]
+            self.vectorPos = [0,0]
             
-            if enemyPos[0] + self.moveVector[1] * 1 + i > player.position[1] and enemyPos[0] + self.moveVector[1] * 1 + i < player.position[1] + player.size:
-                print("hitY")
-                self.vectorPos[1] = enemyPos[0]
-                break
-            else:
-                enemyPos[0] += self.moveVector[1] * 1 + i
+            i = 0
 
-            if o > 200:
-                break
-        
-        col = checkCollision(self.vectorPos,player.position,50,player.size)
-        if col:
-            print("found ya bitch")
+            while True:
+                i += 1
+                enemyPos = [0]
+                enemyPos[0] = self.position[0]
+                
+                
+
+                if enemyPos[0] + self.moveVector[0] * 1 + i > player.position[0] and enemyPos[0] + self.moveVector[0] * 1 + i < player.position[0] + player.size:
+                    self.vectorPos[0] = enemyPos[0]
+                    break
+                else:
+                    enemyPos[0] += self.moveVector[0] * 1 
+
+                self.tempPosition[0] = enemyPos[0]
+
+                if i > 200:
+                    break
+            
+            o = 0
+
+            while True:
+                o += 1
+                enemyPos = [0]
+                enemyPos[0] = self.position[1]
+                
+                if enemyPos[0] + self.moveVector[1] * 1 + i > player.position[1] and enemyPos[0] + self.moveVector[1] * 1 + i < player.position[1] + player.size:
+                    self.vectorPos[1] = enemyPos[0]
+                    break
+                else:
+                    enemyPos[0] += self.moveVector[1] * 1
+
+                self.tempPosition[1] = enemyPos[0]
+
+                if o > 200:
+                    break
+            
+            col = checkCollision(self.tempPosition,self.targetPos,50,player.size)
+            if col:
+                print("found ya bitch")
+                self.enableToMove = False
 
 
 
                 
     
+class AnimationPlayer:
+    def __init__(self,spriteList,animaitonSpeed):
+        self.spriteList = spriteList
+        self.currentPicture = 1
+        self.animationSpeed = animaitonSpeed
+        self.maxAnimationState = self.animationSpeed * len(self.spriteList)
+        self.animationState = 0
+
+    def runAnimation(self):
+        self.animationState += 1
+        if self.animationState == self.animationSpeed * self.currentPicture:
+            self.currentPicture += 1
+            
+            
+        if self.animationState >= self.maxAnimationState:
+            self.animationState = 0
+            
+        if self.currentPicture - 1 >= len(self.spriteList):
+            self.currentPicture = 1
+            
+
+        
         
 
+
+
+
+ 
 
 
         

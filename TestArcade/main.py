@@ -112,14 +112,12 @@ def generateRoom(maze,player,cords,forcedDoors=[False,False,False,False]):
 
     
     if d1 == 70 and not forcedD1:
-
         if (cords[0] + 1) != 3:
             generateRoom(maze,player,[cords[0]+1,cords[1]],[False,False,True,False])
 
     if d2 == 71 and not forcedD2:
         if (cords[1] - 1) != -1:
             generateRoom(maze,player,[cords[0],cords[1]-1],[False,False,False,True])
-
 
     if d3 == 72 and not forcedD3:
         if (cords[0] - 1) != -1:
@@ -139,26 +137,24 @@ class MyGameWindow(arcade.Window):
 
     
     def setup(self):
+        self.animaitonState = 0
         self.player = Player([100,100],500,0.5,20,100)
         
-        self.movingEnemy = MovingEnemy([0,0],120)
+        self.flyingEnemy = FlyingEnemy([0,0],120,2)
         
         self.set_vsync(False)
         
-
         self.enemiesAlive = False
-
 
         self.maze = generateMaze(self.player)
 
-        
-
-        
-
+    
     def on_draw(self):
+        if self.animaitonState == 2:
+            self.animaitonState = 0
+        self.animaitonState += 1
+        
         arcade.start_render()
-
-
         self.room.tileSpriteList.draw()
         if self.player.alive:
             self.player.spriteList.draw()
@@ -167,38 +163,35 @@ class MyGameWindow(arcade.Window):
         for enemy in self.room.enemyList:
             enemy.spriteShotList.draw()
        
-        self.movingEnemy.spriteList.draw()
-        
        
+        self.flyingEnemy.spriteList[self.flyingEnemy.animationPlayer.currentPicture-1].draw()
+        
 
     def update(self, delta_time):
+
+        self.flyingEnemy.spriteList.update()
+
         self.room = self.maze[self.player.worldCord[1]][self.player.worldCord[0]]
         
-        self.movingEnemy.moveEnemyToPlayer(self.player)
-        self.movingEnemy.spriteList[0].set_position(self.movingEnemy.position[0],self.movingEnemy.position[1])
+        self.flyingEnemy.moveEnemyToPlayer(self.player)
+        for i in range(len(self.flyingEnemy.spriteList)):
+            self.flyingEnemy.spriteList[i].set_position(self.flyingEnemy.position[0],self.flyingEnemy.position[1])
 
         if len(self.room.enemyList) > 0:
             self.enemiesAlive = True
         
         else:
             self.enemiesAlive = False
-        
-
-        
-       
-
 
         self.player.lastPosition[0] = self.player.position[0]
         self.player.lastPosition[1] = self.player.position[1]
-
         self.player.position[0] += self.player.directionX * self.player.movementSpeed * delta_time
         self.player.position[1] += self.player.directionY * self.player.movementSpeed * delta_time
-
         self.player.checkKeyStrokes()
         self.player.sprite.set_position(self.player.position[0],self.player.position[1])
         self.player.spriteList.update()
         self.room.tileSpriteList.update()
-        self.movingEnemy.spriteList.update()
+        self.flyingEnemy.spriteList.update()
 
         if self.player.position[0] > 1920 - 155:
             self.player.position[0] = 1920 - 155
@@ -229,8 +222,6 @@ class MyGameWindow(arcade.Window):
             hit = False
             
             for enemy in self.room.enemyList:
-                
-
                 shot.checkIfHit(enemy)
                 if shot.col:
                     enemy.health -= self.player.shotDamage
@@ -272,8 +263,7 @@ class MyGameWindow(arcade.Window):
 
                     self.player.health -= shot.damage
 
-                    
-                
+        
                 if shot.X > 2000 or shot.X < -100 :
                     enemy.shotList.remove(shot)
                     enemy.spriteShotList.remove(shot.sprite)
@@ -298,7 +288,6 @@ class MyGameWindow(arcade.Window):
                 self.player.position[0] = self.player.lastPosition[0]
                 self.player.position[1] = self.player.lastPosition[1]
 
-    
 
         if keyboard.is_pressed("f"):
             print(1/delta_time)
