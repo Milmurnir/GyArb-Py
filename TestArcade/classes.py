@@ -446,8 +446,11 @@ class FlyingEnemy:
             
             col = checkCollision(self.tempPosition,self.targetPos,50,player.size)
             if col:
-                print("found ya bitch")
                 self.enableToMove = False
+                col = checkCollision(self.tempPosition,player.position,32,player.size)
+                if col:
+                    player.health -= 1
+                    print(player.health)
 
 
 
