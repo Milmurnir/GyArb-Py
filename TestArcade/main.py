@@ -182,6 +182,7 @@ class MyGameWindow(arcade.Window):
         
         else:
             self.enemiesAlive = False
+            
 
         self.player.lastPosition[0] = self.player.position[0]
         self.player.lastPosition[1] = self.player.position[1]

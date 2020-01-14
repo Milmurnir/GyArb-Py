@@ -413,8 +413,6 @@ class FlyingEnemy:
                 enemyPos = [0]
                 enemyPos[0] = self.position[0]
                 
-                
-
                 if enemyPos[0] + self.moveVector[0] * 1 + i > player.position[0] and enemyPos[0] + self.moveVector[0] * 1 + i < player.position[0] + player.size:
                     self.vectorPos[0] = enemyPos[0]
                     break
@@ -443,19 +441,20 @@ class FlyingEnemy:
 
                 if o > 200:
                     break
+
+
+         
             
             col = checkCollision(self.tempPosition,self.targetPos,50,player.size)
             if col:
                 self.enableToMove = False
-                col = checkCollision(self.tempPosition,player.position,32,player.size)
-                if col:
+                col1 = checkCollision(self.tempPosition,player.position,100,player.size)
+                
+                if col1:
                     player.health -= 1
                     print(player.health)
 
 
-
-                
-    
 class AnimationPlayer:
     def __init__(self,spriteList,animaitonSpeed):
         self.spriteList = spriteList
