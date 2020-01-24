@@ -38,8 +38,8 @@ def collisionPossible(firstPosition, secondPosition):
 def checkCollision(staticPosition,collidingPosition,staticSize,collidingSize):
     col = collisionPossible(staticPosition,collidingPosition)
     if col:
-        if collidingPosition[0] + collidingSize/2 >= staticPosition[0] - staticSize/2 and collidingPosition[0] <= staticPosition[0] + staticSize:
-            if collidingPosition[1] + collidingSize/2 >= staticPosition[1] - staticSize/2 and collidingPosition[1] <= staticPosition[1] + staticSize:
+        if collidingPosition[0] + collidingSize/2 > staticPosition[0] - staticSize/2 and collidingPosition[0] < staticPosition[0] + staticSize:
+            if collidingPosition[1] + collidingSize/2 > staticPosition[1] - staticSize/2 and collidingPosition[1] < staticPosition[1] + staticSize:
                 return True
 
 class Tile:
@@ -55,7 +55,7 @@ class Player:
     def __init__(self,position,movementSpeed,shootCooldown,shootingSpeed,shotDamage):
         self.position = position
         self.size = 100
-        self.health = 5
+        self.health = 500000000
         self.movementSpeed = movementSpeed
         self.sprite = LoadImage("boi",1,self.position)
         self.shootCooldown = shootCooldown
@@ -73,6 +73,7 @@ class Player:
         self.spriteList = arcade.SpriteList()
         self.spriteList.append(self.sprite)
         self.alive = True
+        self.lastHit = 0
         
     def checkKeyStrokes(self):
             
@@ -235,9 +236,12 @@ class Room:
                 elif Map[y][x] == 36:
                     self.collisionList.append(tile)
                     tile.sprite = LoadImage("mushroom",1,tile.position)
-                    enemy = EnemyShoot(tile.position,player,5,5,tile.sprite)
+                    enemy = EnemyShoot(tile.position,player,5,5,tile.sprite,len(self.collisionList)-1)
                     self.enemyList.append(enemy)
                     
+
+
+                    #Lägg till index på enemy och sedan få de genom att räkna den efter man lägger till den
 
                 elif Map[y][x] == 38:
                     self.collisionList.append(tile)
@@ -311,7 +315,7 @@ class Door:
 
 
 class EnemyShoot:
-    def __init__(self,position,player,shotCooldown,shotDamage,sprite):
+    def __init__(self,position,player,shotCooldown,shotDamage,sprite,index):
         self.position = position
         self.health = 1
         self.size = 120
@@ -325,6 +329,9 @@ class EnemyShoot:
         self.lastShot = 0
         self.sprite = sprite
         self.alive = True
+        self.type = "shooting"
+        self.animation = False
+        self.indexCollision = index
 
     def hitPossible(self):
         if self.health > 0:
@@ -367,12 +374,16 @@ class FlyingEnemy:
         self.position = position
         self.size = size
         self.spriteList = arcade.SpriteList()
-        
+        self.type = "flying"
         self.moveVector = [0,0]
         self.targetPos = [0,0]
         self.cooldown = cooldown
         self.lastAttack = 0
         self.enableToMove = True
+        self.damage = 1
+        self.alive = True
+        self.health = 1
+        self.animation = True
 
         for i in os.listdir("C:\Projects\GyArb-Py\TestArcade\Animations\BombFlying"):
             sprite = LoadImage(str(i),3,self.position,True,"BombFlying")
@@ -381,78 +392,85 @@ class FlyingEnemy:
         self.animationPlayer = AnimationPlayer(self.spriteList,10)
 
     def moveEnemyToPlayer(self,player):
-        
-        self.animationPlayer.runAnimation()
+        if self.alive:
+            self.animationPlayer.runAnimation()
 
-        if time.time() - self.lastAttack >= self.cooldown:
-            self.lastAttack = time.time()
-            self.enableToMove = True
-            self.targetPos[0] = player.position[0]
-            self.targetPos[1] = player.position[1]
-        
-        if self.enableToMove:
-        
-            self.tempPosition = [0,0]
-            self.moveVector[0] = self.targetPos[0] - self.position[0]
-            self.moveVector[1] = self.targetPos[1] - self.position[1]
+            if time.time() - self.lastAttack >= self.cooldown:
+                self.lastAttack = time.time()
+                self.enableToMove = True
+                self.targetPos[0] = player.position[0]
+                self.targetPos[1] = player.position[1]
             
-            self.length = math.sqrt(self.moveVector[0]**2+self.moveVector[1]**2)
-            self.moveVector[0] /= self.length
-            self.moveVector[1] /= self.length
-
-        
-            self.position[0] += self.moveVector[0] * 10
-            self.position[1] += self.moveVector[1] * 10
-
-            self.vectorPos = [0,0]
+            if self.enableToMove:
             
-            i = 0
-
-            while True:
-                i += 1
-                enemyPos = [0]
-                enemyPos[0] = self.position[0]
+                self.tempPosition = [0,0]
+                self.moveVector[0] = self.targetPos[0] - self.position[0]
+                self.moveVector[1] = self.targetPos[1] - self.position[1]
                 
-                if enemyPos[0] + self.moveVector[0] * 1 + i > player.position[0] and enemyPos[0] + self.moveVector[0] * 1 + i < player.position[0] + player.size:
-                    self.vectorPos[0] = enemyPos[0]
-                    break
+                self.length = math.sqrt(self.moveVector[0]**2+self.moveVector[1]**2)
+
+                if self.length == 0:
+                    self.length = 1
+                self.moveVector[0] /= self.length
+                self.moveVector[1] /= self.length
+                
+                movementSpeed = 10
+                if self.length < 10:
+                    movementSpeed = self.length
+
+                self.position[0] += self.moveVector[0] * movementSpeed
+                self.position[1] += self.moveVector[1] * movementSpeed
+
+                self.vectorPos = [0,0]
+                
+                i = 0
+
+                while True:
+                    i += 1
+                    enemyPos = [0]
+                    enemyPos[0] = self.position[0]
+                    
+                    if enemyPos[0] + self.moveVector[0] * 1 + i > player.position[0] and enemyPos[0] + self.moveVector[0] * 1 + i < player.position[0] + player.size:
+                        self.vectorPos[0] = enemyPos[0]
+                        break
+                    else:
+                        enemyPos[0] += self.moveVector[0] * 1 
+
+                
+                    self.tempPosition[0] = enemyPos[0]
+
+                    if i > 200:
+                        break
+                
+                o = 0
+
+                while True:
+                    o += 1
+                    enemyPos = [0]
+                    enemyPos[0] = self.position[1]
+                    
+                    if enemyPos[0] + self.moveVector[1] * 1 + i > player.position[1] and enemyPos[0] + self.moveVector[1] * 1 + i < player.position[1] + player.size:
+                        self.vectorPos[1] = enemyPos[0]
+                        break
+                    else:
+                        enemyPos[0] += self.moveVector[1] * 1
+
+                    
+                    self.tempPosition[1] = enemyPos[0]
+
+                    if o > 200:
+                        break
+                
+                
+
+                col = checkCollision(self.tempPosition,self.targetPos,50,player.size)
+                if col:
+                    self.enableToMove = False
+            
                 else:
-                    enemyPos[0] += self.moveVector[0] * 1 
+                    self.enableToMove = True
 
-                self.tempPosition[0] = enemyPos[0]
-
-                if i > 200:
-                    break
-            
-            o = 0
-
-            while True:
-                o += 1
-                enemyPos = [0]
-                enemyPos[0] = self.position[1]
                 
-                if enemyPos[0] + self.moveVector[1] * 1 + i > player.position[1] and enemyPos[0] + self.moveVector[1] * 1 + i < player.position[1] + player.size:
-                    self.vectorPos[1] = enemyPos[0]
-                    break
-                else:
-                    enemyPos[0] += self.moveVector[1] * 1
-
-                self.tempPosition[1] = enemyPos[0]
-
-                if o > 200:
-                    break
-
-
-         
-            
-            col = checkCollision(self.tempPosition,self.targetPos,50,player.size)
-            if col:
-                self.enableToMove = False
-                col1 = checkCollision(self.tempPosition,player.position,100,player.size)
-                
-                if col1:
-                    player.health -= 1
-                    print(player.health)
 
 
 class AnimationPlayer:
@@ -472,7 +490,7 @@ class AnimationPlayer:
         if self.animationState >= self.maxAnimationState:
             self.animationState = 0
             
-        if self.currentPicture - 1 >= len(self.spriteList):
+        if self.currentPicture -1 >= len(self.spriteList):
             self.currentPicture = 1
             
 
@@ -482,10 +500,10 @@ class AnimationPlayer:
 
 
 
- 
+    
 
 
-        
+            
 
 """
         

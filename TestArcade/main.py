@@ -90,13 +90,13 @@ def generateRoom(maze,player,cords,forcedDoors=[False,False,False,False]):
 
     baseMap = [
         [1,10,10,10,10,10,10,d4,10,10,10,10,10,10,2],
-        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
-        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
+        [13,0,0,0,0,r,0,0,0,r,0,0,0,0,11],
+        [13,0,0,p,0,0,0,0,0,0,0,p,0,0,11],
         [13,0,0,0,0,0,0,o,0,0,0,0,0,0,11],
-        [d3,0,0,0,0,0,n,m,n,0,0,0,0,0,d1],
+        [d3,0,0,q,0,0,n,m,n,0,0,q,0,0,d1],
         [13,0,0,0,0,0,0,o,0,0,0,0,0,0,11],
-        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
-        [13,0,0,0,0,0,0,0,0,0,0,0,0,0,11],
+        [13,0,0,p,0,0,0,0,0,0,0,p,0,0,11],
+        [13,0,0,0,0,r,0,0,0,r,0,0,0,0,11],
         [4,12,12,12,12,12,12,d2,12,12,12,12,12,12,3]
     ]
 
@@ -143,28 +143,35 @@ class MyGameWindow(arcade.Window):
         self.flyingEnemy = FlyingEnemy([0,0],120,2)
         
         self.set_vsync(False)
-        
         self.enemiesAlive = False
 
         self.maze = generateMaze(self.player)
 
-    
+        self.room = self.maze[self.player.worldCord[1]][self.player.worldCord[0]]
+
+        self.room.enemyList.append(self.flyingEnemy)
+
     def on_draw(self):
+
         if self.animaitonState == 2:
             self.animaitonState = 0
         self.animaitonState += 1
         
         arcade.start_render()
+        
         self.room.tileSpriteList.draw()
         if self.player.alive:
             self.player.spriteList.draw()
             self.player.shotSpriteList.draw()
 
+        
         for enemy in self.room.enemyList:
-            enemy.spriteShotList.draw()
-       
-       
-        self.flyingEnemy.spriteList[self.flyingEnemy.animationPlayer.currentPicture-1].draw()
+            if enemy.type == "shooting":
+                enemy.spriteShotList.draw()
+
+            if enemy.animation:
+                enemy.spriteList[enemy.animationPlayer.currentPicture-1].draw()
+        
         
 
     def update(self, delta_time):
@@ -173,16 +180,21 @@ class MyGameWindow(arcade.Window):
 
         self.room = self.maze[self.player.worldCord[1]][self.player.worldCord[0]]
         
-        self.flyingEnemy.moveEnemyToPlayer(self.player)
-        for i in range(len(self.flyingEnemy.spriteList)):
-            self.flyingEnemy.spriteList[i].set_position(self.flyingEnemy.position[0],self.flyingEnemy.position[1])
+        for enemy in self.room.enemyList:
+            if enemy.type == "shooting":
+                enemy.hitPossible()
+            
+            elif enemy.type == "flying":
+                self.flyingEnemy.moveEnemyToPlayer(self.player)
+
+                for i in range(len(self.flyingEnemy.spriteList)):
+                    self.flyingEnemy.spriteList[i].set_position(self.flyingEnemy.position[0],self.flyingEnemy.position[1])
 
         if len(self.room.enemyList) > 0:
             self.enemiesAlive = True
         
         else:
             self.enemiesAlive = False
-            
 
         self.player.lastPosition[0] = self.player.position[0]
         self.player.lastPosition[1] = self.player.position[1]
@@ -222,7 +234,7 @@ class MyGameWindow(arcade.Window):
         for shot in self.player.shotList:
             hit = False
             
-            for enemy in self.room.enemyList:
+            for i,enemy in enumerate(self.room.enemyList):
                 shot.checkIfHit(enemy)
                 if shot.col:
                     enemy.health -= self.player.shotDamage
@@ -232,53 +244,65 @@ class MyGameWindow(arcade.Window):
                         enemy.alive = False
                 
                 if not enemy.alive:
-                    self.room.enemyList.remove(enemy)
-                    self.room.tileSpriteList.remove(enemy.sprite)
-                    tile = Tile(enemy.position)
-                    self.room.tileSpriteList.append(tile.sprite)
+                    self.room.enemyList.pop(i)
+                    
+                    
+
+                    if enemy.type == "shooting":
+                        self.room.tileSpriteList.remove(enemy.sprite)
+                        tile = Tile(enemy.position)
+                        self.room.tileSpriteList.append(tile.sprite)
+                        self.room.collisionList.pop(enemy.indexCollision)
+                        for refEnemy in self.room.enemyList:
+                            if refEnemy.type == "shooting":
+                                if refEnemy.indexCollision > enemy.indexCollision:
+                                    refEnemy.indexCollision -= 1
+
             
             if hit:
                 self.player.shotList.remove(shot)
                 self.player.shotSpriteList.remove(shot.sprite)
             
 
+        
+
+    
         for enemy in self.room.enemyList:
-            enemy.hitPossible()
-
-
-        for enemy in self.room.enemyList:
-
+        
             col = checkCollision(enemy.position,self.player.position,enemy.size +10,self.player.size)
             if col:
-                self.player.health -= enemy.damage
+                if time.time() - self.player.lastHit >= 1.5:
+                    self.player.lastHit = time.time()
+                    self.player.health -= enemy.damage
+                    print("gdsf")
+                    
 
-            for shot in enemy.shotList:
+            if enemy.type == "shooting":
+                for shot in enemy.shotList:
 
-                shot.updateShot(delta_time)
-                shot.sprite.set_position(shot.X,shot.Y)
-                shot.checkIfHit(self.player)
+                    shot.updateShot(delta_time)
+                    shot.sprite.set_position(shot.X,shot.Y)
+                    shot.checkIfHit(self.player)
+                    
+                    if shot.col:
+                        enemy.shotList.remove(shot)
+                        enemy.spriteShotList.remove(shot.sprite)
+                        self.player.health -= shot.damage
+
+                    if shot.X > 2000 or shot.X < -100 :
+                        enemy.shotList.remove(shot)
+                        enemy.spriteShotList.remove(shot.sprite)
+                    
+                    if shot.Y > 1100 or shot.Y < -100:
+                        enemy.shotList.remove(shot)
+                        enemy.spriteShotList.remove(shot.sprite)
                 
-                if shot.col:
-                    enemy.shotList.remove(shot)
-                    enemy.spriteShotList.remove(shot.sprite)
-
-                    self.player.health -= shot.damage
-
-        
-                if shot.X > 2000 or shot.X < -100 :
-                    enemy.shotList.remove(shot)
-                    enemy.spriteShotList.remove(shot.sprite)
-                
-                if shot.Y > 1100 or shot.Y < -100:
-                    enemy.shotList.remove(shot)
-                    enemy.spriteShotList.remove(shot.sprite)
-            
             
         if self.enemiesAlive == False:
             for door in self.room.doors:
                 door.checkTransision(self.player)
         
-        if self.player.health < 0:
+        if self.player.health <= 0:
             self.player.alive = False
             arcade.close_window()
         
