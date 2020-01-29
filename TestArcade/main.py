@@ -93,7 +93,7 @@ def generateRoom(maze,player,cords,forcedDoors=[False,False,False,False]):
         [13,0,0,0,0,r,0,0,0,r,0,0,0,0,11],
         [13,0,0,p,0,0,0,0,0,0,0,p,0,0,11],
         [13,0,0,0,0,0,0,o,0,0,0,0,0,0,11],
-        [d3,0,0,q,0,0,n,m,n,0,0,q,0,0,d1],
+        [d3,0,0,q,s,0,n,c,n,0,s,q,0,0,d1],
         [13,0,0,0,0,0,0,o,0,0,0,0,0,0,11],
         [13,0,0,p,0,0,0,0,0,0,0,p,0,0,11],
         [13,0,0,0,0,r,0,0,0,r,0,0,0,0,11],
@@ -172,7 +172,9 @@ class MyGameWindow(arcade.Window):
             if enemy.animation:
                 enemy.spriteList[enemy.animationPlayer.currentPicture-1].draw()
         
-        
+        for chest in self.room.chestList:
+            if chest.item != None:
+                chest.item.sprite.draw()
 
     def update(self, delta_time):
 
@@ -219,6 +221,8 @@ class MyGameWindow(arcade.Window):
             self.player.position[1] = 1080 - 155
 
 
+        
+
         for shot in self.player.shotList:
             shot.updateShot(delta_time)
             shot.sprite.set_position(shot.X,shot.Y)
@@ -263,10 +267,6 @@ class MyGameWindow(arcade.Window):
                 self.player.shotList.remove(shot)
                 self.player.shotSpriteList.remove(shot.sprite)
             
-
-        
-
-    
         for enemy in self.room.enemyList:
         
             col = checkCollision(enemy.position,self.player.position,enemy.size +10,self.player.size)
@@ -274,7 +274,6 @@ class MyGameWindow(arcade.Window):
                 if time.time() - self.player.lastHit >= 1.5:
                     self.player.lastHit = time.time()
                     self.player.health -= enemy.damage
-                    print("gdsf")
                     
 
             if enemy.type == "shooting":
@@ -313,6 +312,10 @@ class MyGameWindow(arcade.Window):
                 self.player.position[0] = self.player.lastPosition[0]
                 self.player.position[1] = self.player.lastPosition[1]
 
+
+        for chest in self.room.chestList:
+            chest.checkOpen(self.player.position,self.player.size)
+                    
 
         if keyboard.is_pressed("f"):
             print(1/delta_time)

@@ -153,6 +153,8 @@ class Room:
         self.collisionList = []
         self.enemyList = []
         self.doorExist = [False,False,False,False]
+        self.chestList = []
+        
 
         for y in range(9):
             yCord = y* 120 + 60
@@ -240,9 +242,6 @@ class Room:
                     self.enemyList.append(enemy)
                     
 
-
-                    #Lägg till index på enemy och sedan få de genom att räkna den efter man lägger till den
-
                 elif Map[y][x] == 38:
                     self.collisionList.append(tile)
                     tile.sprite = LoadImage("stone",1,tile.position)
@@ -256,9 +255,10 @@ class Room:
                 elif Map[y][x] == 42:
                     self.collisionList.append(tile)
                     tile.sprite = LoadImage("chest1",1,tile.position)
+                    chest = chest1(tile.position,120)
+                    self.chestList.append(chest)
                 
 
-                
                 self.tileSpriteList.append(tile.sprite)
                 
             
@@ -495,38 +495,30 @@ class AnimationPlayer:
             
 
         
-        
 
-
-
-
-    
-
-
-            
-
-"""
-        
-
-
-class chest11:
-    def __init__(self,position,tileSize,roomPosition):
+class chest1:
+    def __init__(self,position,tileSize):
         self.item = None
         self.position = position
         self.tileSize = tileSize
-        self.sprite = LoadImage("chest1",self.tileSize,tile.position)
-        self.roomPosition = roomPosition
+        self.sprite = LoadImage("chest1",self.tileSize,self.position)
         self.open = False
+        self.powerUpSize = 1
 
     def checkOpen(self,playerPosition,playerSize):
         if keyboard.is_pressed("e") and self.open == False:
-            self.open = checkCollision(self.position,playerPosition,playerSize,self.tileSize,self.roomPosition)
-            self.item = PowerUp(self.position,64)
+            self.open = checkCollision(self.position,playerPosition,playerSize,self.tileSize)
+            rnd = random.randrange(0,1)
+            if rnd == 0:
+                self.item = HeartPowerUp(self.position,self.powerUpSize)
+            
+            elif rnd == 1:
+                self.item = DamagePowerUp(self.position,self.powerUpSize)
 
-    def drawchest1(self,display):
-        display.blit(self.sprite,self.position)
-        if self.item.sprite != None:
-            display.blit(self.item.sprite,self.item.position)
+            elif rnd == 2:
+                self.item = MovementPowerUp(self.position,self.powerUpSize)
+
+    
 
 
 class PowerUp:
@@ -536,26 +528,26 @@ class PowerUp:
         self.sprite = None
         rnd = random.randrange(0,1)
         if rnd == 0:
-            self.powerItem = HeartPowerUp(size)
+            self.powerItem = HeartPowerUp(self.position,size)
         
         if rnd == 1:
-            self.powerItem = DamagePowerUp(size)
+            self.powerItem = DamagePowerUp(self.position,size)
 
         if rnd == 2:
-            self.powerItem = MovementPowerUp(size)
+            self.powerItem = MovementPowerUp(self.position,size)
             
 
 class HeartPowerUp:
-    def __init__(self,size):
-        self.sprite = LoadImage("stone",size,tile.position)
-        self.HP = 2
+    def __init__(self,position,size):
+        self.sprite = LoadImage("stone",size,position+[100,100])
+        self.HP = 1
         self.damage = 0
         self.movementSpeed = 0
         self.special = None
 
 
 class DamagePowerUp:
-    def __init__(self,size):
+    def __init__(self,position,size):
         self.HP = 0
         self.damage = 0.5
         self.movementSpeed = 0
@@ -563,9 +555,8 @@ class DamagePowerUp:
 
 
 class MovementPowerUp:
-    def __init__(self,size):
+    def __init__(self,position,size):
         self.HP = 0
         self.damage = 0
         self.movementSpeed = 0.5
         self.special = None
-"""
